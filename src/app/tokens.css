@@ -1,0 +1,247 @@
+/* ========================================
+   VÕ ĐƯỜNG MANAGER — DESIGN TOKENS
+   CSS Variables for all themes
+   ======================================== */
+
+:root {
+    /* Theme Colors - Deep Antigravity Dark */
+    --bg-primary: #09090b;
+    --bg-secondary: #0f1115;
+    --bg-tertiary: #16181d;
+    --bg-card: rgba(24, 24, 27, 0.4);
+    --bg-card-hover: rgba(30, 30, 35, 0.6);
+
+    /* Text Colors */
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --text-tertiary: #71717a;
+    --text-muted: #71717a;
+
+    /* Accent Colors (Neon Cyan/Indigo) */
+    --accent-from: #00f2fe;
+    --accent-to: #4facfe;
+    --accent-rgb-from: 0, 242, 254;
+    --accent-rgb-to: 79, 172, 254;
+
+    /* Border Colors */
+    --border-primary: rgba(255, 255, 255, 0.08);
+    --border-secondary: rgba(255, 255, 255, 0.03);
+
+    /* Status Colors */
+    --status-present-from: rgba(16, 185, 129, 0.2);
+    --status-present-to: rgba(5, 150, 105, 0.3);
+    --status-present-border: rgba(52, 211, 153, 0.5);
+    --status-present-shadow: rgba(16, 185, 129, 0.5);
+
+    --status-absent-bg: rgba(24, 24, 27, 0.4);
+    --status-absent-hover: rgba(39, 39, 42, 0.6);
+
+    --status-excused-from: rgba(234, 179, 8, 0.15);
+    --status-excused-to: rgba(202, 138, 4, 0.25);
+    --status-excused-border: rgba(250, 204, 21, 0.5);
+    --status-excused-shadow: rgba(234, 179, 8, 0.3);
+
+    /* Antigravity Glassmorphism 2.0 */
+    --glass-bg: rgba(15, 15, 18, 0.55);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-blur: 24px;
+    --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+
+    /* Pattern Overlay */
+    --pattern-opacity: 0.02;
+
+    /* Animation Speeds */
+    --transition-fast: 0.2s;
+    --transition-normal: 0.4s;
+    --transition-slow: 0.7s;
+}
+
+/* ========================================
+   DARK THEMES
+   ======================================== */
+
+/* Dark Purple */
+[data-theme="dark-purple"] {
+    --accent-from: #a855f7;
+    --accent-to: #ec4899;
+    --accent-rgb-from: 168, 85, 247;
+    --accent-rgb-to: 236, 72, 153;
+}
+
+/* Dark Green */
+[data-theme="dark-green"] {
+    --accent-from: #10b981;
+    --accent-to: #14b8a6;
+    --accent-rgb-from: 16, 185, 129;
+    --accent-rgb-to: 20, 184, 166;
+}
+
+/* Dark Red */
+[data-theme="dark-red"] {
+    --accent-from: #ef4444;
+    --accent-to: #f97316;
+    --accent-rgb-from: 239, 68, 68;
+    --accent-rgb-to: 249, 115, 22;
+}
+
+/* ========================================
+   ANTIGRAVITY DESIGN SYSTEM (DARK)
+   ======================================== */
+[data-theme="dark-antigravity"] {
+    --bg-primary: #09090b;
+    --bg-secondary: #121214;
+    --bg-tertiary: #18181b;
+
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #64748b;
+
+    --accent-from: #0ea5e9;
+    --accent-to: #6366f1;
+    --accent-rgb-from: 14, 165, 233;
+    --accent-rgb-to: 99, 102, 241;
+
+    --border-primary: rgba(255, 255, 255, 0.1);
+    --border-secondary: rgba(255, 255, 255, 0.05);
+
+    --glass-bg: rgba(18, 18, 20, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-blur: 24px;
+    --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+
+    --bg-card: rgba(24, 24, 27, 0.7);
+    --bg-card-hover: rgba(24, 24, 27, 0.9);
+
+    --status-present-from: rgba(16, 185, 129, 0.35);
+    --status-present-to: rgba(5, 150, 105, 0.45);
+    --status-present-border: rgba(52, 211, 153, 0.7);
+    --status-present-shadow: rgba(16, 185, 129, 0.4);
+
+    --status-absent-bg: rgba(24, 24, 27, 0.6);
+    --status-absent-hover: rgba(30, 41, 59, 0.8);
+
+    --status-excused-from: rgba(234, 179, 8, 0.25);
+    --status-excused-to: rgba(202, 138, 4, 0.35);
+    --status-excused-border: rgba(250, 204, 21, 0.6);
+    --status-excused-shadow: rgba(234, 179, 8, 0.25);
+
+    --pattern-opacity: 0.04;
+}
+
+/* ========================================
+   LIGHT THEMES
+   ======================================== */
+
+/* Light Blue */
+[data-theme="light-blue"] {
+    --bg-primary: #f0f4ff;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e8edf5;
+    --bg-card: rgba(255, 255, 255, 0.7);
+    --bg-card-hover: rgba(255, 255, 255, 0.95);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+
+    --accent-from: #0ea5e9;
+    --accent-to: #6366f1;
+    --accent-rgb-from: 14, 165, 233;
+    --accent-rgb-to: 99, 102, 241;
+
+    --border-primary: rgba(0, 0, 0, 0.1);
+    --border-secondary: rgba(0, 0, 0, 0.05);
+
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(0, 0, 0, 0.08);
+
+    --status-present-from: rgba(16, 185, 129, 0.15);
+    --status-present-to: rgba(5, 150, 105, 0.25);
+    --status-present-border: rgba(16, 185, 129, 0.5);
+    --status-present-shadow: rgba(16, 185, 129, 0.2);
+
+    --status-absent-bg: rgba(243, 244, 246, 0.8);
+    --status-absent-hover: rgba(229, 231, 235, 1);
+
+    --status-excused-from: rgba(234, 179, 8, 0.15);
+    --status-excused-to: rgba(202, 138, 4, 0.25);
+    --status-excused-border: rgba(202, 138, 4, 0.4);
+    --status-excused-shadow: rgba(234, 179, 8, 0.15);
+
+    --pattern-opacity: 0.02;
+}
+
+/* Light Purple */
+[data-theme="light-purple"] {
+    --bg-primary: #faf5ff;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f3e8ff;
+    --bg-card: rgba(255, 255, 255, 0.7);
+    --bg-card-hover: rgba(250, 245, 255, 1);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+
+    --accent-from: #a855f7;
+    --accent-to: #ec4899;
+    --accent-rgb-from: 168, 85, 247;
+    --accent-rgb-to: 236, 72, 153;
+
+    --border-primary: rgba(0, 0, 0, 0.1);
+    --border-secondary: rgba(0, 0, 0, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(0, 0, 0, 0.08);
+
+    --pattern-opacity: 0.02;
+}
+
+/* Light Green */
+[data-theme="light-green"] {
+    --bg-primary: #f0fdf4;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #dcfce7;
+    --bg-card: rgba(255, 255, 255, 0.7);
+    --bg-card-hover: rgba(240, 253, 244, 1);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+
+    --accent-from: #10b981;
+    --accent-to: #14b8a6;
+    --accent-rgb-from: 16, 185, 129;
+    --accent-rgb-to: 20, 184, 166;
+
+    --border-primary: rgba(0, 0, 0, 0.1);
+    --border-secondary: rgba(0, 0, 0, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(0, 0, 0, 0.08);
+
+    --pattern-opacity: 0.02;
+}
+
+/* Light Red */
+[data-theme="light-red"] {
+    --bg-primary: #fef2f2;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #fee2e2;
+    --bg-card: rgba(255, 255, 255, 0.7);
+    --bg-card-hover: rgba(254, 242, 242, 1);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+
+    --accent-from: #ef4444;
+    --accent-to: #f97316;
+    --accent-rgb-from: 239, 68, 68;
+    --accent-rgb-to: 249, 115, 22;
+
+    --border-primary: rgba(0, 0, 0, 0.1);
+    --border-secondary: rgba(0, 0, 0, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-border: rgba(0, 0, 0, 0.08);
+
+    --pattern-opacity: 0.02;
+}
