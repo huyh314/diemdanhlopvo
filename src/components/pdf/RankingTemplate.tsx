@@ -16,9 +16,18 @@ interface RankingData {
 interface RankingTemplateProps {
     rankings: RankingData[];
     week?: string;
+    groupId?: string;
 }
 
-export const RankingTemplate = React.forwardRef<HTMLDivElement, RankingTemplateProps>(({ rankings, week }, ref) => {
+export const RankingTemplate = React.forwardRef<HTMLDivElement, RankingTemplateProps>(({ rankings, week, groupId }, ref) => {
+    // Lọc theo nhóm nếu có groupId
+    const filteredRankings = groupId ? rankings.filter(r => r.group_id === groupId) : rankings;
+
+    // Sort bằng JavaScript để chắc chắn đúng thứ tự điểm số
+    const sortedRankings = [...filteredRankings].sort((a, b) => b.total - a.total);
+
+    const displayTitle = groupId ? `BẢNG XẾP HẠNG THI ĐUA - ${getGroupName(groupId).toUpperCase()}` : 'BẢNG XẾP HẠNG THI ĐUA TỔNG HỢP';
+
     return (
         <div ref={ref} className="p-8 w-[210mm] min-h-[297mm]" style={{ backgroundColor: '#ffffff', color: '#1e293b', fontFamily: 'sans-serif' }}>
             {/* Header */}
@@ -33,11 +42,11 @@ export const RankingTemplate = React.forwardRef<HTMLDivElement, RankingTemplateP
 
             {/* Title */}
             <div className="text-center mb-8">
-                <h2 className="text-xl font-bold uppercase" style={{ color: '#0f172a' }}>Bảng Xếp Hạng Thi Đua</h2>
+                <h2 className="text-xl font-bold uppercase" style={{ color: '#0f172a' }}>{displayTitle}</h2>
                 <p className="text-sm mt-2" style={{ color: '#64748b' }}>
                     {week ? `Tuần: ${week}` : `Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`}
                 </p>
-                <p className="text-sm" style={{ color: '#64748b' }}>Tổng số học sinh: {rankings.length}</p>
+                <p className="text-sm" style={{ color: '#64748b' }}>Tổng số học sinh thuộc bảng này: {sortedRankings.length}</p>
             </div>
 
             {/* Table */}
@@ -54,14 +63,15 @@ export const RankingTemplate = React.forwardRef<HTMLDivElement, RankingTemplateP
                     </tr>
                 </thead>
                 <tbody>
-                    {rankings.map((r, i) => {
-                        const rowBg = i === 0 ? '#fefce8' : i === 1 ? '#f8fafc' : i === 2 ? '#fff7ed' : i % 2 !== 0 ? '#f8fafc' : '#ffffff';
+                    {sortedRankings.map((r, i) => {
+                        const rankNumber = i + 1;
+                        const rowBg = rankNumber === 1 ? '#fefce8' : rankNumber === 2 ? '#f8fafc' : rankNumber === 3 ? '#fff7ed' : rankNumber % 2 === 0 ? '#f8fafc' : '#ffffff';
                         const totalColor = r.total >= 30 ? '#16a34a' : r.total < 10 ? '#ef4444' : '#2563eb';
 
                         return (
                             <tr key={r.student_id} style={{ backgroundColor: rowBg }}>
                                 <td className="px-3 py-2 text-center font-bold" style={{ border: '1px solid #cbd5e1' }}>
-                                    {i === 0 ? '🥇 1' : i === 1 ? '🥈 2' : i === 2 ? '🥉 3' : r.rank}
+                                    {rankNumber === 1 ? '🥇 1' : rankNumber === 2 ? '🥈 2' : rankNumber === 3 ? '🥉 3' : rankNumber}
                                 </td>
                                 <td className="px-3 py-2 font-semibold" style={{ border: '1px solid #cbd5e1' }}>
                                     {r.student_name}

@@ -202,13 +202,59 @@ export async function getAverageRankings(weeks: number = 4) {
 
 export async function getGroupSummary(date?: string) {
     const supabase = await createClient();
-    const { data, error } = await supabase
-        .rpc('fn_group_attendance_summary', {
-            p_date: date ?? new Date().toISOString().slice(0, 10),
-        });
+    const targetDate = date ?? new Date().toISOString().slice(0, 10);
 
-    if (error) throw new Error(`Failed to fetch group summary: ${error.message}`);
-    return data as GroupAttendanceSummaryRow[];
+    const [{ data: students, error: stuErr }, { data: attendance, error: attErr }] = await Promise.all([
+        supabase.from('students').select('id, group_id').eq('is_active', true),
+        supabase.from('attendance').select('student_id, status, sessions!inner(session_date)').eq('sessions.session_date', targetDate)
+    ]);
+
+    if (stuErr) throw new Error(`Failed to fetch students: ${stuErr.message}`);
+    if (attErr) throw new Error(`Failed to fetch attendance: ${attErr.message}`);
+
+    const summaryMap = new Map<string, GroupAttendanceSummaryRow>();
+
+    // Register active students to groups
+    (students || []).forEach(s => {
+        if (!summaryMap.has(s.group_id)) {
+            summaryMap.set(s.group_id, {
+                group_id: s.group_id,
+                total_students: 0,
+                present_count: 0,
+                absent_count: 0,
+                excused_count: 0,
+                rate: 0
+            });
+        }
+        summaryMap.get(s.group_id)!.total_students++;
+    });
+
+    // Populate daily attendance counts
+    (attendance || []).forEach(a => {
+        const student = (students || []).find(s => s.id === a.student_id);
+        if (!student) return;
+
+        const group = summaryMap.get(student.group_id);
+        if (!group) return;
+
+        if (a.status === 'present') group.present_count++;
+        else if (a.status === 'absent') group.absent_count++;
+        else if (a.status === 'excused') group.excused_count++;
+    });
+
+    // Calculate rates properly based only on students who were marked (or all students if needed)
+    // The previous SQL calculated rate based on total marked present / total marked.
+    const result = Array.from(summaryMap.values());
+    result.forEach(group => {
+        const totalChecked = group.present_count + group.absent_count + group.excused_count;
+        if (totalChecked === 0) {
+            group.rate = 0;
+        } else {
+            group.rate = Math.round((group.present_count / totalChecked) * 100);
+        }
+    });
+
+    return result.sort((a, b) => a.group_id.localeCompare(b.group_id));
 }
 
 export async function getAutoChuyenCan(
@@ -248,8 +294,7 @@ export async function getMonthlyExportData(year: number, month: number) {
             students!inner(name, group_id)
         `)
         .gte('sessions.session_date', startDate)
-        .lt('sessions.session_date', endDate)
-        .order('session_date', { referencedTable: 'sessions', ascending: true });
+        .lt('sessions.session_date', endDate);
 
     if (error) throw new Error(`Failed to fetch export data: ${error.message}`);
     return data;

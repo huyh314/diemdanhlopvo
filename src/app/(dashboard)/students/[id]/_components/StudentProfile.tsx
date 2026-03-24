@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateStudentAction, deleteStudentAction } from '../actions';
+import { updateStudentAction, deleteStudentAction, uploadAvatarAction } from '../actions';
 import { GROUPS, getGroupName } from '@/lib/constants';
 import { useToast } from '@/components/Toast';
 import { StudentRow } from '@/types/database.types';
@@ -10,10 +10,29 @@ import { StudentRow } from '@/types/database.types';
 export default function StudentProfile({ student }: { student: StudentRow }) {
     const [isEditing, setIsEditing] = useState(false);
     const [isPending, startTransition] = useTransition();
+    const [isUploading, startUpload] = useTransition();
     const { toast } = useToast();
     const router = useRouter();
 
     const groupLabel = getGroupName(student.group_id);
+
+    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        startUpload(async () => {
+            const result = await uploadAvatarAction(student.id, formData);
+            if (result?.error) {
+                toast(result.error, 'error');
+            } else {
+                toast('Đã cập nhật ảnh đại diện', 'success');
+            }
+            e.target.value = '';
+        });
+    }
 
     async function handleSave(formData: FormData) {
         startTransition(async () => {
@@ -138,22 +157,33 @@ export default function StudentProfile({ student }: { student: StudentRow }) {
                 <span className="text-xs font-bold uppercase tracking-wider">Sửa</span> ✏️
             </button>
             <div className="flex items-center gap-5">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-2xl font-bold text-white shrink-0">
-                    {student.avatar_url ? (
-                        <img
-                            src={student.avatar_url}
-                            alt={student.name}
-                            className="w-full h-full object-cover rounded-full"
-                        />
-                    ) : (
-                        student.name
-                            .split(' ')
-                            .map((w) => w[0])
-                            .slice(-2)
-                            .join('')
-                            .toUpperCase()
-                    )}
-                </div>
+                <label className="relative block w-20 h-20 rounded-full cursor-pointer group shrink-0">
+                    <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isUploading} />
+                    <div className="w-full h-full rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-2xl font-bold text-white overflow-hidden shadow-lg border-2 border-transparent group-hover:border-[var(--accent-from)] transition-all">
+                        {student.avatar_url ? (
+                            <img
+                                src={student.avatar_url}
+                                alt={student.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            student.name
+                                .split(' ')
+                                .map((w) => w[0])
+                                .slice(-2)
+                                .join('')
+                                .toUpperCase()
+                        )}
+                    </div>
+                    {/* Hover Overlay */}
+                    <div className={`absolute inset-0 bg-black/50 rounded-full flex flex-col items-center justify-center transition-opacity ${isUploading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                        {isUploading ? (
+                            <span className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
+                        ) : (
+                            <span className="text-[10px] uppercase font-bold text-center tracking-wider text-white">Đổi Ảnh</span>
+                        )}
+                    </div>
+                </label>
                 <div>
                     <h2 className="text-2xl font-bold pr-16">{student.name}</h2>
                     <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-400">

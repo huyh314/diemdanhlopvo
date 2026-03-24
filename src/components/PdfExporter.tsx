@@ -2,90 +2,61 @@
 
 import { useState } from 'react';
 import { useToast } from './Toast';
-import { StudentReportData } from './pdf/SemesterReportTemplate';
+import { StudentReportData, SemesterReportTemplate } from './pdf/SemesterReportTemplate';
+import { RankingTemplate } from './pdf/RankingTemplate';
 
 interface PdfExporterProps {
     rankings: StudentReportData[];
     weekKey?: string;
 }
 
-const BACKEND_URL = 'http://127.0.0.1:8000';
-
 export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
     const [isExporting, setIsExporting] = useState(false);
     const { toast } = useToast();
 
-    const mapStudentToPython = (student: StudentReportData) => ({
-        ho_ten: student.student_name,
-        gioi_tinh: 'Nam',
-        ngay_sinh: student.birthYear || 'N/A',
-        ngay_tham_gia: 'N/A',
-        dai_cap: student.rank <= 5 ? 'Đai Xanh' : 'Đai Vàng',
-        lop: 'Hệ Thống Võ Đường Phan Phu Tiên',
-        lop_ngan: 'Võ Đường',
-        hoc_ky: weekKey || 'Học kỳ I · 2024-2025',
-        ngay_cap: new Date().toLocaleDateString('vi-VN'),
-        diem_thanh_phan: [
-            ['🏃 Chuyên cần', student.cat_chuyen_can, '30%', student.cat_chuyen_can >= 8 ? '#1D9E75' : '#BA7517'],
-            ['🧘 Ý thức', student.cat_y_thuc, '30%', student.cat_y_thuc >= 8 ? '#1D9E75' : '#BA7517'],
-            ['🥋 Trình độ', student.cat_chuyen_mon, '40%', student.cat_chuyen_mon >= 8 ? '#1D9E75' : '#BA7517'],
-        ],
-        diem_tong: student.total,
-        xep_loai: student.total >= 40 ? 'Xuất sắc' : student.total >= 30 ? 'Giỏi' : student.total >= 20 ? 'Khá' : 'Trung bình',
-        xep_hang: student.rank,
-        si_so: rankings.length,
-        co_mat: Math.round((student.cat_chuyen_can / 10) * 44),
-        vang_kp: Math.max(0, 4 - Math.floor(student.cat_chuyen_can / 2.5)),
-        vang_cp: 0,
-        ti_le_cc: (student.cat_chuyen_can * 10).toFixed(0),
-        nhan_xet: student.total >= 40 ? 'Học sinh ưu tú, kỹ thuật tốt và rất chuyên cần.' : 'Cần cố gắng tập luyện đều đặn hơn để nâng cao kỹ thuật.'
-    });
-
-    const mapRankingToPython = () => ({
-        lop: 'Võ Đường Phan Phu Tiên',
-        hoc_ky: weekKey || 'Học kỳ I · 2024-2025',
-        ngay: new Date().toLocaleDateString('vi-VN'),
-        tong_hs: rankings.length,
-        cc_tb: 88,
-        diem_tb: (rankings.reduce((acc, r) => acc + r.total, 0) / (rankings.length || 1)).toFixed(2),
-        can_chu_y: rankings.filter(r => r.total < 25).length,
-        hs: rankings.map(r => ({
-            ho_ten: r.student_name,
-            dai: r.rank <= 5 ? 'Đai Xanh' : 'Đai Vàng',
-            chuyen_can: Math.round(r.cat_chuyen_can * 10),
-            diem: r.total
-        }))
-    });
-
-    async function downloadPdf(url: string, body: any, filename: string) {
-        const response = await fetch(`${BACKEND_URL}${url}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error || 'Lỗi từ server');
-        }
-
-        const blob = await response.blob();
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.setAttribute('download', filename);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(downloadUrl);
-    }
+    // Tìm tất cả các nhóm hiện có
+    const groups = Array.from(new Set(rankings.map(r => r.group_id))).sort();
 
     async function exportRankingPdf() {
+        if (rankings.length === 0) return;
         setIsExporting(true);
+        toast('Đang xử lý xuất Bảng Xếp Hạng...', 'info');
         try {
-            await downloadPdf('/api/export/ranking', { ranking: mapRankingToPython() }, `BangXepHang_${weekKey || 'latest'}.pdf`);
-            toast('Đã xuất PDF Bảng Xếp Hạng', 'success');
+            // Lazy load thư viện nặng
+            const html2canvas = (await import('html2canvas')).default;
+            const { jsPDF } = await import('jspdf');
+
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            let isFirstPage = true;
+
+            for (let i = 0; i < groups.length; i++) {
+                const groupId = groups[i];
+                const element = document.getElementById(`pdf-ranking-template-${groupId}`);
+                if (!element) continue;
+
+                // Capture canvas
+                const canvas = await html2canvas(element, { scale: 1.5, useCORS: true, logging: false });
+                const imgData = canvas.toDataURL('image/jpeg', 0.8);
+
+                if (!isFirstPage) {
+                    pdf.addPage();
+                }
+
+                // Giữ nguyên tỷ lệ khung hình thực tế để chữ không bị bóp méo
+                const imgWidth = 210;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                isFirstPage = false;
+
+                await new Promise(resolve => setTimeout(resolve, 100)); // Nghỉ một chút tránh treo máy
+            }
+
+            pdf.save(`BangXepHang_${weekKey || 'latest'}.pdf`);
+
+            toast('Đã tải xuống Bảng Xếp Hạng', 'success');
         } catch (err) {
+            console.error(err);
             toast('Lỗi xuất PDF: ' + (err as Error).message, 'error');
         } finally {
             setIsExporting(false);
@@ -95,13 +66,39 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
     async function exportAllReportsPdf() {
         if (rankings.length === 0) return;
         setIsExporting(true);
-        toast('Đang xử lý xuất các phiếu kết quả...', 'info');
-        try {
-            const mappedStudents = rankings.map(mapStudentToPython);
-            await downloadPdf('/api/export/report', { student: mappedStudents }, `PhieuKetQua_Hang_Loat.pdf`);
+        toast(`Đang xử lý ${rankings.length} phiếu kết quả... Vui lòng đợi!`, 'info');
 
-            toast(`Đã xuất PDF Phiếu Kết Quả`, 'success');
+        try {
+            // Lazy load thư viện nặng
+            const html2canvas = (await import('html2canvas')).default;
+            const { jsPDF } = await import('jspdf');
+
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            let isFirstPage = true;
+
+            for (let i = 0; i < rankings.length; i++) {
+                const student = rankings[i];
+                const element = document.getElementById(`pdf-report-${student.student_id}`);
+                if (!element) continue;
+
+                // Render và chụp từng trang, dùng scale 1.5 để tiết kiệm RAM thay vì scale 2.0 dễ bị out of memory với 71 ảnh
+                const canvas = await html2canvas(element, { scale: 1.5, useCORS: true, logging: false });
+                const imgData = canvas.toDataURL('image/jpeg', 0.6); // Dùng chất lượng 0.6 để PDF nhẹ, tải nhanh
+
+                if (!isFirstPage) {
+                    pdf.addPage();
+                }
+                pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
+                isFirstPage = false;
+
+                // Nghỉ 100ms cho mỗi trang để máy tính không bị đơ giật do quá tải
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+
+            pdf.save(`PhieuKetQua_HangLoat_${weekKey || 'latest'}.pdf`);
+            toast(`Đã tải xuống ${rankings.length} Phiếu Kết Quả`, 'success');
         } catch (err) {
+            console.error(err);
             toast('Lỗi xuất Phiếu KQ: ' + (err as Error).message, 'error');
         } finally {
             setIsExporting(false);
@@ -124,6 +121,23 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
             >
                 {isExporting ? '⏳' : '📋'} Phiếu Kết Quả
             </button>
+
+            {/* Hidden Templates for HTML2Canvas */}
+            <div style={{ position: 'absolute', top: 0, left: '-20000px', width: '210mm' }} aria-hidden="true">
+                {/* Export từng nhóm cho Ranking */}
+                {groups.map(g => (
+                    <div key={`ranking-${g}`} id={`pdf-ranking-template-${g}`} className="bg-white">
+                        <RankingTemplate rankings={rankings as any} week={weekKey} groupId={g} />
+                    </div>
+                ))}
+
+                {/* Tất cả con đặt absolute để xếp chồng nhau, không làm dài container quá mức */}
+                {rankings.map(s => (
+                    <div key={s.student_id} id={`pdf-report-${s.student_id}`} className="bg-white" style={{ position: 'absolute', top: 0, left: 0, width: '210mm', height: '297mm' }}>
+                        <SemesterReportTemplate student={s} week={weekKey} />
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }

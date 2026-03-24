@@ -20,127 +20,133 @@ interface SemesterReportTemplateProps {
 }
 
 export const SemesterReportTemplate = React.forwardRef<HTMLDivElement, SemesterReportTemplateProps>(({ student, week }, ref) => {
+
     // Generate comment based on total score
     const generateComment = (total: number) => {
-        if (total >= 40) return 'Xuất sắc! Học sinh có thành tích thi đua vượt trội, thể hiện tinh thần chuyên cần, kỷ luật rất tốt và trình độ cao. Cần tiếp tục phát huy.';
-        if (total >= 30) return 'Tốt! Học sinh có điểm thi đua cao, chăm chỉ tập luyện và có ý thức kỷ luật tốt. Cần cố gắng thêm để đạt mức xuất sắc.';
-        if (total >= 20) return 'Khá! Học sinh có tinh thần tập luyện đều đặn. Cần chú ý cải thiện thêm về kỷ luật và trình độ kỹ thuật.';
-        if (total >= 10) return 'Trung bình. Học sinh cần nỗ lực hơn trong việc tập luyện đều đặn, giữ kỷ luật tốt hơn và cải thiện trình độ.';
-        return 'Cần cải thiện. Điểm thi đua còn thấp, học sinh cần tích cực tham gia tập luyện, chấp hành nội quy và nâng cao trình độ.';
+        if (total >= 40) return 'Học sinh có thành tích thi đua vượt trội, thể hiện tinh thần chuyên cần, kỷ luật tốt và trình độ cao. Cần tiếp tục phát huy trong các kỳ đánh giá tiếp theo.';
+        if (total >= 30) return 'Học sinh có điểm thi đua tốt, chăm chỉ tập luyện và có ý thức kỷ luật. Cần cố gắng thêm để đạt mức xuất sắc.';
+        if (total >= 20) return 'Học sinh có tinh thần tập luyện đều đặn. Cần chú ý cải thiện thêm về kỷ luật và trình độ kỹ thuật.';
+        if (total >= 10) return 'Học sinh cần nỗ lực hơn trong việc tập luyện đều đặn, giữ kỷ luật tốt hơn và cải thiện trình độ.';
+        return 'Học sinh cần tích cực tham gia tập luyện, chấp hành nội quy và nâng cao trình độ để cải thiện điểm số.';
+    };
+
+    const getBadge = (total: number) => {
+        if (total >= 40) return 'Xuất sắc';
+        if (total >= 30) return 'Giỏi';
+        if (total >= 20) return 'Khá';
+        return 'Trung bình';
     };
 
     const pct = Math.min(Math.max((student.total || 0) / 50, 0), 1) * 100;
-    const progressColor = pct >= 60 ? '#10b981' : pct >= 40 ? '#f59e0b' : '#ef4444';
 
     return (
-        <div ref={ref} className="p-8 w-[210mm] min-h-[297mm] mx-auto" style={{ backgroundColor: '#ffffff', color: '#1e293b', fontFamily: 'sans-serif' }}>
-            {/* Header */}
-            <div className="pb-4 mb-6" style={{ borderBottom: '4px solid #0ea5e9' }}>
-                <h1 className="text-2xl font-bold text-center uppercase tracking-wide" style={{ color: '#0369a1' }}>
-                    Võ Đường Phan Phu Tiên
-                </h1>
-                <p className="text-center text-sm mt-1" style={{ color: '#64748b' }}>
-                    Hệ Thống Quản Lý Điểm Danh & Thi Đua
-                </p>
-            </div>
+        <div ref={ref} className="w-[210mm] h-[297mm] box-border p-[6mm]" style={{ background: '#eef3f8', color: '#1f2937', fontFamily: '"Segoe UI", Arial, sans-serif' }}>
+            <div className="bg-white rounded-[22px] overflow-hidden flex flex-col h-full" style={{ boxShadow: '0 12px 35px rgba(15, 94, 156, 0.12)', border: '1px solid #e5edf5' }}>
+                {/* Header */}
+                <div style={{ background: 'linear-gradient(135deg, #0f5e9c, #1fa7e1)', color: 'white', padding: '30px 36px 26px', textAlign: 'center' }}>
+                    <h1 style={{ fontSize: '34px', fontWeight: 800, letterSpacing: '1px', marginBottom: '8px', textTransform: 'uppercase', margin: 0 }}>VÕ ĐƯỜNG PHAN PHU TIÊN</h1>
+                    <p style={{ fontSize: '16px', opacity: 0.95, margin: 0 }}>Hệ thống quản lý điểm danh & thi đua</p>
+                </div>
 
-            {/* Student Info Box */}
-            <div className="rounded-lg p-6 mb-8" style={{ backgroundColor: '#f8fafc', border: '1px solid #f1f5f9' }}>
-                <div className="grid grid-cols-2 gap-4">
-                    <div>
-                        <p className="text-sm mb-1" style={{ color: '#64748b' }}>Họ và Tên</p>
-                        <p className="text-xl font-bold" style={{ color: '#0f172a' }}>{student.student_name}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm mb-1" style={{ color: '#64748b' }}>Năm Sinh</p>
-                        <p className="text-lg font-semibold" style={{ color: '#334155' }}>{student.birthYear || 'N/A'}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm mb-1" style={{ color: '#64748b' }}>Nhóm</p>
-                        <p className="text-lg font-semibold" style={{ color: '#334155' }}>
-                            {getGroupName(student.group_id)}
-                        </p>
-                    </div>
-                    <div>
-                        <p className="text-sm mb-1" style={{ color: '#64748b' }}>Kỳ Đánh Giá</p>
-                        <p className="text-lg font-semibold" style={{ color: '#334155' }}>{week || 'Hiện tại'}</p>
+                {/* Section 1 */}
+                <div style={{ padding: '26px 32px' }}>
+                    <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f5e9c', marginBottom: '18px', textTransform: 'uppercase' }}>Phiếu đánh giá thi đua</div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                        <div style={{ background: '#f8fbfe', border: '1px solid #dce8f3', borderRadius: '16px', padding: '18px 20px' }}>
+                            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>Họ và tên</div>
+                            <div style={{ fontSize: '30px', fontWeight: 800, color: '#111827' }}>{student.student_name}</div>
+                        </div>
+
+                        <div style={{ background: '#f8fbfe', border: '1px solid #dce8f3', borderRadius: '16px', padding: '18px 20px' }}>
+                            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>Năm sinh</div>
+                            <div style={{ fontSize: '20px', fontWeight: 800, color: '#111827' }}>{student.birthYear || 'N/A'}</div>
+                        </div>
+
+                        <div style={{ background: '#f8fbfe', border: '1px solid #dce8f3', borderRadius: '16px', padding: '18px 20px' }}>
+                            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>Nhóm</div>
+                            <div style={{ fontSize: '20px', fontWeight: 800, color: '#111827' }}>{getGroupName(student.group_id)}</div>
+                        </div>
+
+                        <div style={{ background: '#f8fbfe', border: '1px solid #dce8f3', borderRadius: '16px', padding: '18px 20px' }}>
+                            <div style={{ fontSize: '14px', color: '#6b7280', marginBottom: '8px' }}>Kỳ đánh giá</div>
+                            <div style={{ fontSize: '20px', fontWeight: 800, color: '#111827' }}>{week || 'Hiện tại'}</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Title */}
-            <div className="text-center mb-6">
-                <h2 className="text-xl font-bold uppercase" style={{ color: '#0369a1' }}>Bảng Điểm Thi Đua</h2>
-            </div>
+                {/* Section 2 */}
+                <div style={{ padding: '0 32px 26px 32px', flex: 1 }}>
+                    <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f5e9c', marginBottom: '18px', textTransform: 'uppercase' }}>Bảng điểm thi đua</div>
 
-            {/* Score Table */}
-            <table className="w-full text-sm border-collapse mb-8" style={{ border: '1px solid #e2e8f0' }}>
-                <thead>
-                    <tr style={{ backgroundColor: '#0ea5e9', color: '#ffffff' }}>
-                        <th className="px-4 py-3 text-left w-1/3" style={{ border: '1px solid #e2e8f0' }}>Tiêu Chí</th>
-                        <th className="px-4 py-3 text-left" style={{ border: '1px solid #e2e8f0' }}>Mô Tả</th>
-                        <th className="px-4 py-3 text-center w-24" style={{ border: '1px solid #e2e8f0' }}>Điểm</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style={{ backgroundColor: '#ffffff' }}>
-                        <td className="px-4 py-4 font-bold" style={{ border: '1px solid #e2e8f0' }}>🏃 Chuyên Cần</td>
-                        <td className="px-4 py-4" style={{ border: '1px solid #e2e8f0', color: '#64748b' }}>Tập đều, đúng giờ</td>
-                        <td className="px-4 py-4 text-center font-bold text-lg" style={{ border: '1px solid #e2e8f0' }}>
-                            {student.cat_chuyen_can > 0 ? `+${student.cat_chuyen_can}` : student.cat_chuyen_can}
-                        </td>
-                    </tr>
-                    <tr style={{ backgroundColor: '#f8fafc' }}>
-                        <td className="px-4 py-4 font-bold" style={{ border: '1px solid #e2e8f0' }}>🧘 Ý Thức</td>
-                        <td className="px-4 py-4" style={{ border: '1px solid #e2e8f0', color: '#64748b' }}>Thái độ, kỷ luật</td>
-                        <td className="px-4 py-4 text-center font-bold text-lg" style={{ border: '1px solid #e2e8f0' }}>
-                            {student.cat_y_thuc > 0 ? `+${student.cat_y_thuc}` : student.cat_y_thuc}
-                        </td>
-                    </tr>
-                    <tr style={{ backgroundColor: '#ffffff' }}>
-                        <td className="px-4 py-4 font-bold" style={{ border: '1px solid #e2e8f0' }}>🥋 Trình Độ</td>
-                        <td className="px-4 py-4" style={{ border: '1px solid #e2e8f0', color: '#64748b' }}>Thuộc bài, thể lực</td>
-                        <td className="px-4 py-4 text-center font-bold text-lg" style={{ border: '1px solid #e2e8f0' }}>
-                            {student.cat_chuyen_mon > 0 ? `+${student.cat_chuyen_mon}` : student.cat_chuyen_mon}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '22px', alignItems: 'start' }}>
+                        <div style={{ border: '1px solid #dce8f3', borderRadius: '18px', overflow: 'hidden', background: 'white' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead style={{ background: '#0f5e9c', color: 'white' }}>
+                                    <tr>
+                                        <th style={{ padding: '16px 18px', textAlign: 'left', borderBottom: '1px solid #e7eef5', fontSize: '15px', fontWeight: 700 }}>Tiêu chí</th>
+                                        <th style={{ padding: '16px 18px', textAlign: 'left', borderBottom: '1px solid #e7eef5', fontSize: '15px', fontWeight: 700 }}>Mô tả</th>
+                                        <th style={{ padding: '16px 18px', textAlign: 'center', borderBottom: '1px solid #e7eef5', fontSize: '15px', fontWeight: 700, width: '120px', whiteSpace: 'nowrap' }}>Điểm</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style={{ padding: '16px 18px', textAlign: 'left', borderBottom: '1px solid #e7eef5', fontSize: '16px' }}>🏃 Chuyên cần</td>
+                                        <td style={{ padding: '16px 18px', textAlign: 'left', borderBottom: '1px solid #e7eef5', fontSize: '16px' }}>Tập đều, đúng giờ</td>
+                                        <td style={{ padding: '16px 18px', textAlign: 'center', borderBottom: '1px solid #e7eef5', fontWeight: 800, fontSize: '26px', color: '#0f5e9c' }}>
+                                            {student.cat_chuyen_can > 0 ? `+${student.cat_chuyen_can}` : student.cat_chuyen_can}
+                                        </td>
+                                    </tr>
+                                    <tr style={{ background: '#f8fbfe' }}>
+                                        <td style={{ padding: '16px 18px', textAlign: 'left', borderBottom: '1px solid #e7eef5', fontSize: '16px' }}>💡 Ý thức</td>
+                                        <td style={{ padding: '16px 18px', textAlign: 'left', borderBottom: '1px solid #e7eef5', fontSize: '16px' }}>Thái độ, kỷ luật</td>
+                                        <td style={{ padding: '16px 18px', textAlign: 'center', borderBottom: '1px solid #e7eef5', fontWeight: 800, fontSize: '26px', color: '#0f5e9c' }}>
+                                            {student.cat_y_thuc > 0 ? `+${student.cat_y_thuc}` : student.cat_y_thuc}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style={{ padding: '16px 18px', textAlign: 'left', borderBottom: '1px solid #e7eef5', fontSize: '16px' }}>🥋 Trình độ</td>
+                                        <td style={{ padding: '16px 18px', textAlign: 'left', borderBottom: '1px solid #e7eef5', fontSize: '16px' }}>Thuộc bài, thể lực</td>
+                                        <td style={{ padding: '16px 18px', textAlign: 'center', borderBottom: '1px solid #e7eef5', fontWeight: 800, fontSize: '26px', color: '#0f5e9c' }}>
+                                            {student.cat_chuyen_mon > 0 ? `+${student.cat_chuyen_mon}` : student.cat_chuyen_mon}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
-            {/* Total Score Box */}
-            <div className="flex justify-center mb-8">
-                <div className="rounded-lg py-4 px-10 text-center shadow-md" style={{ backgroundColor: '#0ea5e9' }}>
-                    <p className="text-sm mb-1 uppercase tracking-wider font-semibold" style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Tổng Điểm Tích Lũy</p>
-                    <p className="text-white text-4xl font-bold">{student.total} <span className="text-xl font-normal opacity-80">PT</span></p>
+                        <div style={{ background: 'linear-gradient(180deg, #f8fbfe, #eef7fd)', border: '1px solid #d9e9f5', borderRadius: '22px', padding: '24px 20px', textAlign: 'center', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.7)', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 700, color: '#0f5e9c', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>Tổng điểm tích lũy</div>
+                            <div>
+                                <span style={{ fontSize: '58px', fontWeight: 900, color: '#0f5e9c', lineHeight: 1 }}>{student.total}</span>
+                                <span style={{ fontSize: '22px', fontWeight: 700, color: '#1fa7e1', marginLeft: '4px' }}>PT</span>
+                            </div>
+                            <div style={{ display: 'inline-block', marginTop: '14px', padding: '8px 16px', borderRadius: '999px', background: '#19b97a', color: 'white', fontWeight: 700, fontSize: '14px', textTransform: 'uppercase' }}>
+                                {getBadge(student.total)}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ marginTop: '22px', background: '#f8fbfe', border: '1px solid #dce8f3', borderRadius: '18px', padding: '20px' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 800, marginBottom: '12px', color: '#0f5e9c' }}>Nhận xét</div>
+                        <div style={{ fontSize: '17px', lineHeight: 1.7, color: '#334155', marginBottom: '18px' }}>
+                            {generateComment(student.total)}
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', fontWeight: 700, fontSize: '15px', color: '#475569', marginBottom: '10px', flexWrap: 'wrap' }}>
+                            <span>Tiến trình: {student.total}/50 PT ({Math.round(pct)}%)</span>
+                            <span>Mục tiêu: 50 PT</span>
+                        </div>
+
+                        <div style={{ width: '100%', height: '16px', background: '#dbe7f1', borderRadius: '999px', overflow: 'hidden' }}>
+                            <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, #19b97a, #29cc8b)', borderRadius: '999px' }}></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            {/* Comment Section */}
-            <div className="mb-10">
-                <h3 className="font-bold mb-2 text-lg" style={{ color: '#1e293b' }}>Nhận xét:</h3>
-                <p className="leading-relaxed p-4 rounded-lg" style={{ color: '#475569', backgroundColor: '#f8fafc', border: '1px solid #f1f5f9' }}>
-                    {generateComment(student.total)}
-                </p>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mb-12">
-                <div className="flex justify-between text-sm mb-2" style={{ color: '#64748b' }}>
-                    <span>Tiến trình: {student.total}/50 PT ({Math.round(pct)}%)</span>
-                    <span>Mục tiêu: 50 PT</span>
+                <div style={{ padding: '20px 32px 28px', textAlign: 'center', fontSize: '14px', color: '#94a3b8' }}>
+                    Xuất bởi hệ thống VoDuongManager • {new Date().toLocaleTimeString('vi-VN')} {new Date().toLocaleDateString('vi-VN')}
                 </div>
-                <div className="h-4 w-full rounded-full overflow-hidden relative" style={{ backgroundColor: '#e2e8f0' }}>
-                    <div className="h-full transition-all" style={{ width: `${pct}%`, backgroundColor: progressColor }}></div>
-                    {/* Markers */}
-                    <div className="absolute top-0 bottom-0 left-[40%] w-[1px]" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}></div>
-                    <div className="absolute top-0 bottom-0 left-[60%] w-[1px]" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}></div>
-                    <div className="absolute top-0 bottom-0 left-[80%] w-[1px]" style={{ backgroundColor: 'rgba(255, 255, 255, 0.5)' }}></div>
-                </div>
-            </div>
-
-            {/* Footer */}
-            <div className="mt-auto text-center text-xs pt-6" style={{ color: '#94a3b8', borderTop: '1px solid #e2e8f0' }}>
-                Xuất bởi hệ thống VoDuongManager • {new Date().toLocaleString('vi-VN')}
             </div>
         </div>
     );

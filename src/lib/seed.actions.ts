@@ -24,7 +24,7 @@ export async function run10DaySeedAction() {
 
         // 1. Tạo tất cả Sessions trước bằng 1 lệnh RPC hoặc bulk insert
         // Vì DAL chưa có bulk session, ta sẽ tạo tuần tự nhưng giới hạn số lượng ngày nếu cần
-        const daysToSeed = 5; // Giảm xuống 5 ngày để đảm bảo không bị timeout trên Netlify
+        const daysToSeed = 10; // Thay đổi thành 10 ngày theo yêu cầu
 
         for (let i = daysToSeed; i >= 0; i--) {
             const date = new Date(now);
