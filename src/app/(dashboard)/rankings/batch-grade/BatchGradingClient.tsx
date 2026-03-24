@@ -215,7 +215,7 @@ export default function BatchGradingClient({
         <div className="flex flex-col md:flex-row gap-6 relative pb-28 md:pb-6">
 
             {/* Left Panel: Criteria List */}
-            <div className="w-full md:w-80 flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl overflow-hidden self-start sticky top-6">
+            <div className="w-full md:w-80 flex-shrink-0 bg-white/5 border border-white/10 rounded-2xl overflow-hidden self-start md:sticky md:top-6">
                 <div className="p-4 border-b border-white/10 text-xs font-bold text-gray-400 uppercase tracking-widest">
                     📋 Tiêu chí chấm điểm
                 </div>
