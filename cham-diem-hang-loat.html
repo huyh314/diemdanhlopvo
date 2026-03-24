@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chấm Điểm Hàng Loạt — Võ Đường Phan Phú Tiên</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --surface: #16171c;
+    --surface2: #1e2028;
+    --border: rgba(255,255,255,0.07);
+    --text: #e8e8f0;
+    --muted: #6b6e80;
+    --gold: #f5a623;
+    --gold-dim: rgba(245,166,35,0.15);
+
+    --cc-color: #ff6b35;
+    --cc-glow: rgba(255,107,53,0.25);
+    --yt-color: #f5c518;
+    --yt-glow: rgba(245,197,24,0.25);
+    --cm-color: #4ecdc4;
+    --cm-glow: rgba(78,205,196,0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Be Vietnam Pro', sans-serif;
+    min-height: 100vh;
+    padding: 24px;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(245,166,35,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 10% 80%, rgba(78,205,196,0.05) 0%, transparent 50%);
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .header-icon {
+    width: 48px; height: 48px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(245,166,35,0.4);
+    border-radius: 12px;
+    display: grid; place-items: center;
+    font-size: 22px;
+  }
+  .header-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 1px;
+  }
+  .header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .header-date { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+  /* ── STEP INDICATOR ── */
+  .steps {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 6px;
+  }
+  .step {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 8px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .25s;
+    position: relative;
+  }
+  .step.active {
+    background: var(--surface2);
+    color: var(--text);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  .step-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--border);
+    display: grid; place-items: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .step.active .step-num { background: var(--gold); color: #000; }
+  .step.done .step-num { background: #22c55e; color: #000; }
+  .step.done { color: #22c55e; }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+
+  /* ── LEFT PANEL: criterion selector ── */
+  .panel-left {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    position: sticky;
+    top: 24px;
+  }
+  .panel-left-header {
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  .group-block { padding: 10px 10px 6px; }
+  .group-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    margin-bottom: 4px;
+  }
+  .group-label.cc { background: var(--cc-glow); color: var(--cc-color); }
+  .group-label.yt { background: var(--yt-glow); color: var(--yt-color); }
+  .group-label.cm { background: var(--cm-glow); color: var(--cm-color); }
+
+  .group-badge {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 99px;
+    background: rgba(255,255,255,0.08);
+    color: inherit;
+    font-weight: 600;
+  }
+
+  .criterion-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: left;
+    transition: all .2s;
+    margin-bottom: 2px;
+    position: relative;
+  }
+  .criterion-btn:hover { background: var(--surface2); }
+  .criterion-btn.active { background: var(--surface2); }
+  .criterion-btn.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 6px; bottom: 6px;
+    width: 3px;
+    border-radius: 2px;
+  }
+  .criterion-btn.active.cc::before { background: var(--cc-color); }
+  .criterion-btn.active.yt::before { background: var(--yt-color); }
+  .criterion-btn.active.cm::before { background: var(--cm-color); }
+
+  .criterion-icon { font-size: 15px; width: 20px; text-align: center; }
+  .criterion-name { flex: 1; font-weight: 500; }
+  .criterion-max { font-size: 11px; color: var(--muted); font-weight: 600; }
+  .criterion-done-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    display: none;
+  }
+  .criterion-btn.scored .criterion-done-dot { display: block; }
+
+  .auto-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 4px 10px 10px;
+    padding: 10px 12px;
+    background: rgba(255,107,53,0.08);
+    border: 1px solid rgba(255,107,53,0.2);
+    border-radius: 10px;
+    font-size: 11px;
+    color: var(--cc-color);
+    line-height: 1.5;
+  }
+
+  /* ── RIGHT PANEL: student sliders ── */
+  .panel-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .right-header {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .criterion-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .criterion-pill.cc { background: var(--cc-glow); color: var(--cc-color); border: 1px solid rgba(255,107,53,0.3); }
+  .criterion-pill.yt { background: var(--yt-glow); color: var(--yt-color); border: 1px solid rgba(245,197,24,0.3); }
+  .criterion-pill.cm { background: var(--cm-glow); color: var(--cm-color); border: 1px solid rgba(78,205,196,0.3); }
+
+  .right-header-info { flex: 1; }
+  .right-header-info h3 { font-size: 16px; font-weight: 700; }
+  .right-header-info p { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  .quick-actions {
+    display: flex; gap: 8px;
+  }
+  .q-btn {
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .q-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── STUDENT CARD ── */
+  .students-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .student-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 42px 1fr auto;
+    align-items: center;
+    gap: 14px;
+    transition: border-color .2s;
+  }
+  .student-card:hover { border-color: rgba(255,255,255,0.14); }
+
+  .student-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .student-name { font-size: 14px; font-weight: 600; }
+  .student-group { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 240px;
+  }
+
+  .slider-track {
+    flex: 1;
+    position: relative;
+    height: 6px;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--surface2);
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    border: 3px solid;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    transition: transform .15s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  input[type=range]::-moz-range-thumb {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+
+  .slider-val {
+    min-width: 44px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 800;
+    font-family: 'Orbitron', sans-serif;
+    transition: all .2s;
+  }
+
+  /* ── SAVE BAR ── */
+  .save-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: sticky;
+    bottom: 16px;
+    z-index: 10;
+  }
+  .save-stats {
+    display: flex; gap: 20px;
+  }
+  .save-stat { text-align: center; }
+  .save-stat-val { font-size: 22px; font-weight: 800; font-family: 'Orbitron', sans-serif; color: var(--gold); }
+  .save-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+
+  .save-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 28px;
+    background: var(--gold);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all .2s;
+    letter-spacing: .5px;
+  }
+  .save-btn:hover { background: #ffba45; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,166,35,0.4); }
+  .save-btn:active { transform: translateY(0); }
+
+  /* ── GROUP COLORS ── */
+  .cc-color { color: var(--cc-color) !important; border-color: var(--cc-color) !important; }
+  .yt-color { color: var(--yt-color) !important; border-color: var(--yt-color) !important; }
+  .cm-color { color: var(--cm-color) !important; border-color: var(--cm-color) !important; }
+
+  /* toast */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #22c55e;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: all .3s;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 768px) {
+    .layout { grid-template-columns: 1fr; }
+    .panel-left { position: static; }
+    .slider-wrap { min-width: 160px; }
+    body { padding: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-icon">🏆</div>
+  <div>
+    <div class="header-title">VÕ ĐƯỜNG PHAN PHÚ TIÊN</div>
+    <div class="header-sub">Chấm điểm hàng loạt học sinh</div>
+  </div>
+  <div class="header-date" id="dateDisplay"></div>
+</div>
+
+<!-- STEPS -->
+<div class="steps">
+  <div class="step active" id="step1">
+    <div class="step-num">1</div>
+    <span>Chọn tiêu chí</span>
+  </div>
+  <div class="step" id="step2">
+    <div class="step-num">2</div>
+    <span>Kéo điểm từng học sinh</span>
+  </div>
+  <div class="step" id="step3">
+    <div class="step-num">3</div>
+    <span>Lưu & chuyển tiêu chí</span>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: Criterion Selector -->
+  <div class="panel-left">
+    <div class="panel-left-header">📋 Tiêu chí chấm điểm</div>
+
+    <!-- GROUP I: CHUYÊN CẦN -->
+    <div class="group-block">
+      <div class="group-label cc">🚀 I. Chuyên Cần <span class="group-badge">0–30đ</span></div>
+      <button class="criterion-btn cc" onclick="selectCriterion(this,'cc','auto')" data-group="cc" data-key="diemdanh">
+        <span class="criterion-icon">📅</span>
+        <span class="criterion-name">Điểm danh & Chuyên cần</span>
+        <span class="criterion-max">30đ</span>
+        <span class="criterion-done-dot"></span>
+      </button>
+      <div class="auto-note">⚡ Mục này tự động tính từ dữ liệu điểm danh hàng tuần</div>
+    </div>
+
+    <!-- GROUP II: Ý THỨC -->
+    <div class="group-block">
+      <div class="group-label yt">⭐ II. Ý Thức – Kỷ Luật <span class="group-badge">0–30đ</span></div>
+      <button class="criterion-btn yt" onclick="selectCriterion(this,'yt','lephep')" data-key="lephep">
+        <span class="criterion-icon">🙏</span>
+        <span class="criterion-name">Lễ phép, chào hỏi đầy đủ</span>
+        <span class="criterion-max">10đ</span>
+        <span class="criterion-done-dot"></span>
+      </button>
+      <button class="criterion-btn yt" onclick="selectCriterion(this,'yt','tratttu')" data-key="tratttu">
+        <span class="criterion-icon">🔇</span>
+        <span class="criterion-name">Giữ trật tự trong giờ học</span>
+        <span class="criterion-max">10đ</span>
+        <span class="criterion-done-dot"></span>
+      </button>
+      <button class="criterion-btn yt" onclick="selectCriterion(this,'yt','dongphuc')" data-key="dongphuc">
+        <span class="criterion-icon">👘</span>
+        <span class="criterion-name">Mặc đồng phục đúng quy định</span>
+        <span class="criterion-max">10đ</span>
+        <span class="criterion-done-dot"></span>
+      </button>
+    </div>
+
+    <!-- GROUP III: CHUYÊN MÔN -->
+    <div class="group-block">
+      <div class="group-label cm">🥋 III. Chuyên Môn <span class="group-badge">0–20đ</span></div>
+      <button class="criterion-btn cm" onclick="selectCriterion(this,'cm','kynam')" data-key="kynam">
+        <span class="criterion-icon">🥊</span>
+        <span class="criterion-name">Kỹ năng thực hành</span>
+        <span class="criterion-max">5đ</span>
+        <span class="criterion-done-dot"></span>
+      </button>
+      <button class="criterion-btn cm" onclick="selectCriterion(this,'cm','thaido')" data-key="thaido">
+        <span class="criterion-icon">💪</span>
+        <span class="criterion-name">Thái độ luyện tập</span>
+        <span class="criterion-max">5đ</span>
+        <span class="criterion-done-dot"></span>
+      </button>
+      <button class="criterion-btn cm" onclick="selectCriterion(this,'cm','tienbodinhky')" data-key="tienbodinhky">
+        <span class="criterion-icon">📈</span>
+        <span class="criterion-name">Tiến bộ định kỳ</span>
+        <span class="criterion-max">5đ</span>
+        <span class="criterion-done-dot"></span>
+      </button>
+      <button class="criterion-btn cm" onclick="selectCriterion(this,'cm','nhiettinh')" data-key="nhiettinh">
+        <span class="criterion-icon">🔥</span>
+        <span class="criterion-name">Nhiệt tình, tích cực</span>
+        <span class="criterion-max">5đ</span>
+        <span class="criterion-done-dot"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT: Student Sliders -->
+  <div class="panel-right">
+
+    <!-- Right Header -->
+    <div class="right-header">
+      <div class="criterion-pill yt" id="activePill">⭐ Lễ phép, chào hỏi đầy đủ</div>
+      <div class="right-header-info">
+        <h3 id="activeTitle">Lễ phép, chào hỏi đầy đủ</h3>
+        <p id="activeDesc">Nhóm II – Ý Thức & Kỷ Luật · Tối đa 10 điểm</p>
+      </div>
+      <div class="quick-actions">
+        <button class="q-btn" onclick="setAllScore(10)">Tất cả Max</button>
+        <button class="q-btn" onclick="setAllScore(0)">Reset</button>
+      </div>
+    </div>
+
+    <!-- Student list -->
+    <div class="students-list" id="studentList"></div>
+
+    <!-- Save bar -->
+    <div class="save-bar">
+      <div class="save-stats">
+        <div class="save-stat">
+          <div class="save-stat-val" id="statAvg">0.0</div>
+          <div class="save-stat-label">Điểm TB</div>
+        </div>
+        <div class="save-stat">
+          <div class="save-stat-val" id="statTotal">0</div>
+          <div class="save-stat-label">Tổng điểm</div>
+        </div>
+        <div class="save-stat">
+          <div class="save-stat-val" id="statCount">0</div>
+          <div class="save-stat-label">Học sinh</div>
+        </div>
+      </div>
+      <button class="save-btn" onclick="saveScores()">
+        💾 Lưu & Tiếp theo
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast">✅ Đã lưu điểm thành công!</div>
+
+<script>
+const STUDENTS = [
+  { id:1, name:'An Khang',     group:'N2', color:'#e74c3c' },
+  { id:2, name:'Anh Khôi',     group:'N3', color:'#3498db' },
+  { id:3, name:'Bảo An',       group:'N2', color:'#f39c12' },
+  { id:4, name:'Bảo Anh',      group:'N2', color:'#9b59b6' },
+  { id:5, name:'Bảo Hân',      group:'N1', color:'#1abc9c' },
+  { id:6, name:'Bảo Linh',     group:'N2', color:'#e74c3c' },
+  { id:7, name:'Bảo Ngân',     group:'N1', color:'#2ecc71' },
+  { id:8, name:'Bảo Ngọc',     group:'N2', color:'#3498db' },
+  { id:9, name:'Bảo Ngọc',     group:'N1', color:'#f39c12' },
+  { id:10, name:'Bảo Trân',    group:'N2', color:'#e67e22' },
+  { id:11, name:'Chu Minh Hoàng', group:'N1', color:'#1abc9c' },
+  { id:12, name:'Công Giáp',   group:'N1', color:'#9b59b6' },
+];
+
+const CRITERIA = {
+  diemdanh: { label:'Điểm danh & Chuyên cần', group:'cc', groupLabel:'Chuyên Cần', max:30, auto:true },
+  lephep:   { label:'Lễ phép, chào hỏi đầy đủ', group:'yt', groupLabel:'Ý Thức – Kỷ Luật', max:10 },
+  tratttu:  { label:'Giữ trật tự trong giờ học', group:'yt', groupLabel:'Ý Thức – Kỷ Luật', max:10 },
+  dongphuc: { label:'Mặc đồng phục đúng quy định', group:'yt', groupLabel:'Ý Thức – Kỷ Luật', max:10 },
+  kynam:    { label:'Kỹ năng thực hành', group:'cm', groupLabel:'Chuyên Môn', max:5 },
+  thaido:   { label:'Thái độ luyện tập', group:'cm', groupLabel:'Chuyên Môn', max:5 },
+  tienbodinhky: { label:'Tiến bộ định kỳ', group:'cm', groupLabel:'Chuyên Môn', max:5 },
+  nhiettinh:{ label:'Nhiệt tình, tích cực', group:'cm', groupLabel:'Chuyên Môn', max:5 },
+};
+
+// scores[criterionKey][studentId] = value
+const scores = {};
+Object.keys(CRITERIA).forEach(k => { scores[k] = {}; STUDENTS.forEach(s => { scores[k][s.id] = 0; }); });
+const savedKeys = new Set();
+
+let activeKey = 'lephep';
+let activeGroup = 'yt';
+
+function getGroupIcon(g) { return g==='cc'?'🚀':g==='yt'?'⭐':'🥋'; }
+
+function selectCriterion(btn, group, key) {
+  if (key === 'auto') { return; }
+  // update sidebar active
+  document.querySelectorAll('.criterion-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activeKey = key;
+  activeGroup = group;
+  renderRight();
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+}
+
+function renderRight() {
+  const cr = CRITERIA[activeKey];
+  // pill
+  const pill = document.getElementById('activePill');
+  pill.className = `criterion-pill ${activeGroup}`;
+  pill.textContent = getGroupIcon(activeGroup) + ' ' + cr.label;
+  document.getElementById('activeTitle').textContent = cr.label;
+  document.getElementById('activeDesc').textContent = `Nhóm ${activeGroup.toUpperCase()} – ${cr.groupLabel} · Tối đa ${cr.max} điểm`;
+
+  renderStudents();
+}
+
+function renderStudents() {
+  const cr = CRITERIA[activeKey];
+  const list = document.getElementById('studentList');
+  const colorVar = activeGroup === 'cc' ? 'var(--cc-color)' : activeGroup === 'yt' ? 'var(--yt-color)' : 'var(--cm-color)';
+
+  list.innerHTML = STUDENTS.map(s => {
+    const val = scores[activeKey][s.id];
+    const pct = (val / cr.max) * 100;
+    const initials = s.name.split(' ').map(w => w[0]).join('').slice(0,2);
+    return `
+    <div class="student-card" id="card-${s.id}">
+      <div class="student-avatar" style="background:${s.color};">${initials}</div>
+      <div>
+        <div class="student-name">${s.name}</div>
+        <div class="student-group">Nhóm ${s.group}</div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" min="0" max="${cr.max}" step="1" value="${val}"
+          style="--fill:${pct}%; background: linear-gradient(to right, ${colorVar} ${pct}%, var(--surface2) ${pct}%);"
+          oninput="updateScore(${s.id}, this)"
+          id="slider-${s.id}">
+        <div class="slider-val ${activeGroup}-color" id="val-${s.id}" style="color:${colorVar};border:2px solid ${colorVar};">${val}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  updateStats();
+}
+
+function updateScore(studentId, input) {
+  const val = +input.value;
+  const cr = CRITERIA[activeKey];
+  const pct = (val / cr.max) * 100;
+  const colorVar = activeGroup === 'cc' ? 'var(--cc-color)' : activeGroup === 'yt' ? 'var(--yt-color)' : 'var(--cm-color)';
+  input.style.background = `linear-gradient(to right, ${colorVar} ${pct}%, var(--surface2) ${pct}%)`;
+  scores[activeKey][studentId] = val;
+  document.getElementById(`val-${studentId}`).textContent = val;
+  updateStats();
+}
+
+function updateStats() {
+  const cr = CRITERIA[activeKey];
+  const vals = STUDENTS.map(s => scores[activeKey][s.id]);
+  const total = vals.reduce((a,b)=>a+b,0);
+  const avg = total / vals.length;
+  document.getElementById('statAvg').textContent = avg.toFixed(1);
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statCount').textContent = STUDENTS.length;
+}
+
+function setAllScore(v) {
+  const cr = CRITERIA[activeKey];
+  const capped = Math.min(v, cr.max);
+  STUDENTS.forEach(s => {
+    scores[activeKey][s.id] = capped;
+    const slider = document.getElementById(`slider-${s.id}`);
+    if (slider) {
+      slider.value = capped;
+      updateScore(s.id, slider);
+    }
+  });
+}
+
+function saveScores() {
+  savedKeys.add(activeKey);
+  // mark criterion as done
+  document.querySelectorAll('.criterion-btn').forEach(btn => {
+    if (btn.dataset.key === activeKey) {
+      btn.classList.add('scored');
+    }
+  });
+  showToast('✅ Đã lưu điểm: ' + CRITERIA[activeKey].label);
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step3').classList.add('active');
+  setTimeout(()=>{
+    document.getElementById('step3').classList.remove('active');
+    document.getElementById('step1').classList.add('active');
+  }, 1500);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2800);
+}
+
+// Date
+const d = new Date();
+document.getElementById('dateDisplay').textContent =
+  'Thứ ' + (d.getDay()+1) + ', ' + d.toLocaleDateString('vi-VN');
+
+// Init
+document.querySelectorAll('.criterion-btn').forEach(btn => {
+  if (btn.dataset.key === 'lephep') {
+    btn.classList.add('active');
+  }
+});
+renderRight();
+</script>
+</body>
+</html>

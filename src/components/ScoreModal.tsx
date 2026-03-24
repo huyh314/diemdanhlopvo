@@ -29,30 +29,41 @@ interface CriterionState {
 }
 
 const INITIAL_CRITERIA: CriterionState[] = [
-    // Chuyên Cần (30đ)
-    { category: 'chuyen_can', criterionKey: '1-1', label: 'Nghỉ có phép', value: 0, maxValue: 30, deductions: [] },
-    { category: 'chuyen_can', criterionKey: '1-2', label: 'Nghỉ không phép', value: 0, maxValue: 30, deductions: [] },
-    // Ý Thức (30đ)
-    { category: 'y_thuc', criterionKey: '2-1', label: 'Lễ phép, chào hỏi đầy đủ', value: 0, maxValue: 10, deductions: [] },
-    { category: 'y_thuc', criterionKey: '2-2', label: 'Giữ trật tự trong giờ học', value: 0, maxValue: 10, deductions: [] },
-    { category: 'y_thuc', criterionKey: '2-3', label: 'Mặc võ phục đúng quy định', value: 0, maxValue: 10, deductions: [] },
-    // Chuyên Môn (40đ)
-    { category: 'chuyen_mon', criterionKey: '3-1', label: 'Kỹ thuật căn bản', value: 0, maxValue: 10, deductions: [] },
-    { category: 'chuyen_mon', criterionKey: '3-2', label: 'Đối luyện / Phản xạ', value: 0, maxValue: 10, deductions: [] },
-    { category: 'chuyen_mon', criterionKey: '3-3', label: 'Bài quyền', value: 0, maxValue: 10, deductions: [] },
-    { category: 'chuyen_mon', criterionKey: '3-4', label: 'Thể lực', value: 0, maxValue: 10, deductions: [] },
+    // Chuyên Cần (30đ) — tự động tính từ điểm danh
+    { category: 'chuyen_can', criterionKey: '1-1', label: 'Nghỉ có phép', value: 30, maxValue: 30, deductions: [] },
+    { category: 'chuyen_can', criterionKey: '1-2', label: 'Nghỉ không phép', value: 30, maxValue: 30, deductions: [] },
+    // Ý Thức (30đ) — mặc định đầy điểm
+    { category: 'y_thuc', criterionKey: '2-1', label: 'Lễ phép, chào hỏi đầy đủ', value: 10, maxValue: 10, deductions: [] },
+    { category: 'y_thuc', criterionKey: '2-2', label: 'Giữ trật tự trong giờ học', value: 10, maxValue: 10, deductions: [] },
+    { category: 'y_thuc', criterionKey: '2-3', label: 'Mặc võ phục đúng quy định', value: 10, maxValue: 10, deductions: [] },
+    // Chuyên Môn (20đ, mỗi mục 5đ) — mặc định đầy điểm
+    { category: 'chuyen_mon', criterionKey: '3-1', label: 'Kỹ thuật căn bản', value: 5, maxValue: 5, deductions: [] },
+    { category: 'chuyen_mon', criterionKey: '3-2', label: 'Đối luyện / Phản xạ', value: 5, maxValue: 5, deductions: [] },
+    { category: 'chuyen_mon', criterionKey: '3-3', label: 'Bài quyền', value: 5, maxValue: 5, deductions: [] },
+    { category: 'chuyen_mon', criterionKey: '3-4', label: 'Thể lực', value: 5, maxValue: 5, deductions: [] },
 ];
 
 const CATEGORIES = [
     { key: 'chuyen_can', label: 'I. Chuyên Cần', icon: '🚀', gradient: 'from-orange-500 to-orange-700', max: 30, desc: 'Tập đều, không vắng mặt' },
     { key: 'y_thuc', label: 'II. Ý Thức – Kỷ Luật', icon: '⭐', gradient: 'from-green-500 to-green-700', max: 30, desc: 'Thái độ, kỷ luật' },
-    { key: 'chuyen_mon', label: 'III. Chuyên Môn', icon: '🥋', gradient: 'from-purple-500 to-purple-700', max: 40, desc: 'Kỹ thuật chuyên sâu' },
+    { key: 'chuyen_mon', label: 'III. Chuyên Môn', icon: '🥋', gradient: 'from-purple-500 to-purple-700', max: 20, desc: 'Kỹ thuật chuyên sâu' },
 ];
 
 export default function ScoreModal({ studentId, studentName, weekKey, onClose, autoChuyenCan }: ScoreModalProps) {
     const [criteria, setCriteria] = useState<CriterionState[]>(INITIAL_CRITERIA);
     const [notes, setNotes] = useState('');
-    const [expandedCat, setExpandedCat] = useState<string | null>(null);
+    // Mặc định mở rộng tất cả các category
+    const [expandedCats, setExpandedCats] = useState<Set<string>>(
+        new Set(['chuyen_can', 'y_thuc', 'chuyen_mon'])
+    );
+    const toggleCat = (catKey: string) => {
+        setExpandedCats(prev => {
+            const next = new Set(prev);
+            if (next.has(catKey)) next.delete(catKey);
+            else next.add(catKey);
+            return next;
+        });
+    };
     const [isPending, startTransition] = useTransition();
     const { toast } = useToast();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -167,11 +178,11 @@ export default function ScoreModal({ studentId, studentName, weekKey, onClose, a
                 <div className="text-xs text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Điểm Tích Lũy</div>
                 <div className="text-5xl font-bold text-yellow-400">{totalScore}<span className="text-sm text-[var(--text-tertiary)] ml-1">PT</span></div>
                 {/* Progress bar showing total */}
-                <ProgressBar value={totalScore} variant="warning" height="h-1.5" className="mt-3" />
+                <ProgressBar value={(totalScore / 80) * 100} variant="warning" height="h-1.5" className="mt-3" />
                 <div className="mt-2 text-xs text-[var(--accent-from)] flex justify-center gap-3">
                     <span>Chuyên Cần: <strong>{getCatScore('chuyen_can')}</strong>/30</span>
                     <span>Ý Thức: <strong>{getCatScore('y_thuc')}</strong>/30</span>
-                    <span>Chuyên Môn: <strong>{getCatScore('chuyen_mon')}</strong>/40</span>
+                    <span>Chuyên Môn: <strong>{getCatScore('chuyen_mon')}</strong>/20</span>
                 </div>
                 {typeof autoChuyenCan === 'number' && (
                     <div className="mt-2 text-xs text-emerald-400">
@@ -184,14 +195,14 @@ export default function ScoreModal({ studentId, studentName, weekKey, onClose, a
             <div className="p-4 space-y-4 perspective-[1000px]" ref={containerRef}>
                 {CATEGORIES.map((cat) => {
                     const catCriteria = criteria.filter((c) => c.category === cat.key);
-                    const isExpanded = expandedCat === cat.key;
                     const catScore = getCatScore(cat.key);
+                    const isExpanded = expandedCats.has(cat.key);
 
                     return (
                         <div key={cat.key} className="score-category rounded-[16px] overflow-hidden border border-[var(--border-secondary)] bg-[var(--bg-tertiary)] shadow-[0_10px_30px_rgba(0,0,0,0.2)] transform-gpu transition-all duration-300 hover:border-[var(--border-primary)]">
                             {/* Category Header */}
                             <button
-                                onClick={() => setExpandedCat(isExpanded ? null : cat.key)}
+                                onClick={() => toggleCat(cat.key)}
                                 className={`w-full bg-gradient-to-r ${cat.gradient} p-4 flex justify-between items-center relative overflow-hidden`}
                             >
                                 <div className="absolute inset-0 bg-white/5 opacity-0 hover:opacity-100 transition-opacity duration-300" />

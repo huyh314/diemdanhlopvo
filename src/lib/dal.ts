@@ -279,6 +279,94 @@ export async function getScores(studentId: string, weekKey?: string) {
     return data;
 }
 
+export async function getScoresByWeek(weekKey: string) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('scores')
+        .select(`
+      *,
+      score_criteria (*)
+    `)
+        .eq('week_key', weekKey);
+
+    if (error) throw new Error(`Failed to fetch scores for week: ${error.message}`);
+    return data;
+}
+
+export async function saveBatchCriterionScore(input: {
+    weekKey: string;
+    category: ScoreCategory;
+    criterionKey: string;
+    label: string;
+    maxValue: number;
+    studentValues: { studentId: string; value: number }[];
+}) {
+    // This is a complex upsert since 'scores' table needs its total updated,
+    // and 'score_criteria' needs to be upserted.
+    // Given the complexity of Supabase RPC for this, we will handle it via multiple operations
+    // or by fetching all existing scores for the week, updating the specific criterion,
+    // recalculating the total, and saving back.
+    const client = await createClient();
+
+    // Fetch existing scores for these students for the week
+    const existingScores = await getScoresByWeek(input.weekKey);
+
+    for (const sv of input.studentValues) {
+        const studentId = sv.studentId;
+        const existingScore = existingScores.find(s => s.student_id === studentId);
+
+        let scoreId = existingScore?.id;
+        let newTotal = existingScore?.total || 0;
+
+        if (existingScore) {
+            // Recalculate total
+            const criteriaList = Array.isArray(existingScore.score_criteria) ? existingScore.score_criteria : [];
+            const otherCriteria = criteriaList.filter((c: any) => c.criterion_key !== input.criterionKey);
+            const otherSum = otherCriteria.reduce((acc: number, c: any) => acc + c.value, 0);
+            newTotal = otherSum + sv.value;
+
+            // Update total
+            if (scoreId) {
+                await client.from('scores').update({ total: newTotal }).eq('id', scoreId);
+            }
+        } else {
+            // Create new score record
+            newTotal = sv.value;
+            const { data: newScoreRecord, error: newScoreErr } = await client
+                .from('scores')
+                .insert({
+                    student_id: studentId,
+                    week_key: input.weekKey,
+                    total: newTotal,
+                    notes: '',
+                })
+                .select()
+                .single();
+            if (newScoreErr) throw new Error(`Failed to create score record: ${newScoreErr.message}`);
+            scoreId = newScoreRecord.id;
+        }
+
+        // Upsert criteria
+        // Supabase doesn't easily upsert if we don't have PK, but we can delete and insert or query first.
+        if (scoreId) {
+            await client.from('score_criteria')
+                .delete()
+                .match({ score_id: scoreId, criterion_key: input.criterionKey });
+
+            await client.from('score_criteria')
+                .insert({
+                    score_id: scoreId as string,
+                    category: input.category,
+                    criterion_key: input.criterionKey,
+                    label: input.label,
+                    value: sv.value,
+                    max_value: input.maxValue,
+                    deductions: [],
+                });
+        }
+    }
+}
+
 export async function saveScore(input: {
     studentId: string;
     weekKey: string;

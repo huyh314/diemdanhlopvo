@@ -1,12 +1,8 @@
 import { login } from './actions';
 import SubmitButton from './SubmitButton';
+import MessageDisplay from './MessageDisplay';
 
-export default async function LoginPage({
-    searchParams,
-}: {
-    searchParams: Promise<{ message: string }>;
-}) {
-    const { message } = await searchParams;
+export default function LoginPage() {
 
     return (
         <div className="min-h-screen bg-[var(--bg-primary)] flex items-center justify-center p-4 font-sans text-[var(--text-primary)] relative overflow-hidden">
@@ -87,12 +83,7 @@ export default async function LoginPage({
                         </div>
 
                         {/* Error message */}
-                        {message && (
-                            <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm text-center backdrop-blur-sm animate-fade-in">
-                                <span className="font-semibold">⚠️ </span>
-                                {message}
-                            </div>
-                        )}
+                        <MessageDisplay />
                     </form>
 
                     {/* Footer */}

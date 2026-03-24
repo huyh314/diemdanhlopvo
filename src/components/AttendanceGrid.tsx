@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useMemo, useRef } from 'react';
+import { useState, useTransition, useMemo, useRef, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useToast } from './Toast';
@@ -42,16 +42,43 @@ const STATUS_CONFIG: Record<AttendanceStatus, { label: string; icon: string; car
 };
 
 export default function AttendanceGrid({ initialStudents, groupId, sessionDate }: AttendanceGridProps) {
+    // Key unique cho mỗi nhóm + ngày để không trộn lẫn dữ liệu
+    const DRAFT_KEY = `attendance_draft_${groupId}_${sessionDate}`;
+
     const [statuses, setStatuses] = useState<Record<string, AttendanceStatus>>(() => {
-        const map: Record<string, AttendanceStatus> = {};
-        initialStudents.forEach((s) => { map[s.id] = 'absent'; });
-        return map;
+        // Khởi tạo mặc định 'absent'
+        const defaults: Record<string, AttendanceStatus> = {};
+        initialStudents.forEach((s) => { defaults[s.id] = 'absent'; });
+
+        // Thử khôi phục từ localStorage nếu đang chạy trên trình duyệt
+        if (typeof window !== 'undefined') {
+            try {
+                const saved = localStorage.getItem(DRAFT_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved) as Record<string, AttendanceStatus>;
+                    // Merge: chỉ lấy các key có trong danh sách học sinh hiện tại
+                    const merged: Record<string, AttendanceStatus> = { ...defaults };
+                    initialStudents.forEach((s) => {
+                        if (parsed[s.id]) merged[s.id] = parsed[s.id];
+                    });
+                    return merged;
+                }
+            } catch { /* bỏ qua lỗi parse */ }
+        }
+        return defaults;
     });
     const [search, setSearch] = useState('');
     const [isPending, startTransition] = useTransition();
     const [hasChanges, setHasChanges] = useState(false);
     const { toast } = useToast();
     const gridRef = useRef<HTMLDivElement>(null);
+
+    // Tự động lưu vào localStorage mỗi lần statuses thay đổi
+    useEffect(() => {
+        try {
+            localStorage.setItem(DRAFT_KEY, JSON.stringify(statuses));
+        } catch { /* bỏ qua nếu localStorage đầy */ }
+    }, [statuses, DRAFT_KEY]);
 
     // Filter students
     const filtered = useMemo(() => {
@@ -125,6 +152,8 @@ export default function AttendanceGrid({ initialStudents, groupId, sessionDate }
             if (!result.success) {
                 toast(result.error || 'Lỗi khi lưu điểm danh', 'error');
             } else {
+                // Xóa draft sau khi lưu thành công
+                try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
                 toast(`Đã lưu điểm danh: ${stats.present} có mặt / ${stats.total} học sinh`, 'success');
                 setHasChanges(false);
             }

@@ -8,8 +8,10 @@ import { getGroupName } from '@/lib/constants';
 // ==========================================
 
 export async function DashboardKPIs() {
-    const groupSummary = await getGroupSummary();
-    const rankings = await getStudentRankings();
+    const [groupSummary, rankings] = await Promise.all([
+        getGroupSummary().catch(() => []),
+        getStudentRankings().catch(() => []),
+    ]);
 
     const totalStudents = groupSummary.reduce((sum, g) => sum + g.total_students, 0);
     const totalPresent = groupSummary.reduce((sum, g) => sum + g.present_count, 0);
@@ -65,7 +67,7 @@ export function DashboardKPIsSkeleton() {
 // ==========================================
 
 export async function DashboardRankings() {
-    const rankings = await getStudentRankings();
+    const rankings = await getStudentRankings().catch(() => []);
 
     return (
         <Card variant="glass" className="space-y-6">
@@ -137,7 +139,7 @@ export function DashboardRankingsSkeleton() {
 // ==========================================
 
 export async function DashboardGroupSummary() {
-    const groupSummary = await getGroupSummary();
+    const groupSummary = await getGroupSummary().catch(() => []);
 
     return (
         <Card variant="glass" className="space-y-6">

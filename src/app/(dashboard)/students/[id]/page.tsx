@@ -5,6 +5,7 @@
 import { notFound } from 'next/navigation';
 import { getStudent, getAttendanceStats, getScores } from '@/lib/dal';
 import { getGroupName } from '@/lib/constants';
+import StudentProfile from './_components/StudentProfile';
 
 export async function generateMetadata({
     params,
@@ -42,7 +43,6 @@ export default async function StudentDetailPage({
     ]);
 
     const studentStats = stats[0];
-    const groupLabel = getGroupName(student.group_id);
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
@@ -55,36 +55,7 @@ export default async function StudentDetailPage({
             </a>
 
             {/* Profile Header */}
-            <div className="rounded-xl bg-white/5 border border-white/10 p-6 backdrop-blur-sm">
-                <div className="flex items-center gap-5">
-                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-2xl font-bold text-white shrink-0">
-                        {student.avatar_url ? (
-                            <img
-                                src={student.avatar_url}
-                                alt={student.name}
-                                className="w-full h-full object-cover rounded-full"
-                            />
-                        ) : (
-                            student.name
-                                .split(' ')
-                                .map((w) => w[0])
-                                .slice(-2)
-                                .join('')
-                                .toUpperCase()
-                        )}
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-bold">{student.name}</h2>
-                        <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
-                            <span className="px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 text-xs font-bold">
-                                {groupLabel}
-                            </span>
-                            {student.birth_year && <span>Sinh: {student.birth_year}</span>}
-                            {student.phone && <span>📱 {student.phone}</span>}
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <StudentProfile student={student} />
 
             {/* Attendance Stats */}
             {studentStats && (
