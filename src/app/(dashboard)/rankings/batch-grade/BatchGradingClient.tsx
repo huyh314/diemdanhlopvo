@@ -23,10 +23,10 @@ const CRITERIA: Record<string, ScoreCriteriaItem> = {
     lephep: { label: 'Lễ phép, chào hỏi đầy đủ', group: 'yt', groupLabel: 'Ý Thức – Kỷ Luật', max: 10, category: 'y_thuc' },
     tratttu: { label: 'Giữ trật tự trong giờ học', group: 'yt', groupLabel: 'Ý Thức – Kỷ Luật', max: 10, category: 'y_thuc' },
     dongphuc: { label: 'Mặc đồng phục đúng quy định', group: 'yt', groupLabel: 'Ý Thức – Kỷ Luật', max: 10, category: 'y_thuc' },
-    kynam: { label: 'Kỹ năng thực hành', group: 'cm', groupLabel: 'Chuyên Môn', max: 5, category: 'chuyen_mon' },
-    thaido: { label: 'Thái độ luyện tập', group: 'cm', groupLabel: 'Chuyên Môn', max: 5, category: 'chuyen_mon' },
-    tienbodinhky: { label: 'Tiến bộ định kỳ', group: 'cm', groupLabel: 'Chuyên Môn', max: 5, category: 'chuyen_mon' },
-    nhiettinh: { label: 'Nhiệt tình, tích cực', group: 'cm', groupLabel: 'Chuyên Môn', max: 5, category: 'chuyen_mon' },
+    ktcoban: { label: 'Kỹ thuật cơ bản', group: 'cm', groupLabel: 'Chuyên Môn', max: 10, category: 'chuyen_mon' },
+    quyenthual: { label: 'Quyền thuật', group: 'cm', groupLabel: 'Chuyên Môn', max: 10, category: 'chuyen_mon' },
+    doikhang: { label: 'Đối kháng', group: 'cm', groupLabel: 'Chuyên Môn', max: 10, category: 'chuyen_mon' },
+    theluc: { label: 'Thể lực', group: 'cm', groupLabel: 'Chuyên Môn', max: 10, category: 'chuyen_mon' },
 };
 
 function getGroupIcon(g: string) { return g === 'cc' ? '🚀' : g === 'yt' ? '⭐' : '🥋'; }
@@ -270,7 +270,7 @@ export default function BatchGradingClient({
                     <div>
                         <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-1 bg-teal-400/10 text-teal-400 text-xs font-bold uppercase tracking-wider">
                             🥋 III. Chuyên Môn
-                            <span className="ml-auto bg-teal-400/20 px-2 py-0.5 rounded-full text-[10px]">0-20đ</span>
+                            <span className="ml-auto bg-teal-400/20 px-2 py-0.5 rounded-full text-[10px]">0-40đ</span>
                         </div>
                         {Object.entries(CRITERIA).filter(([, c]) => c.group === 'cm').map(([k, c]) => (
                             <button

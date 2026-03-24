@@ -36,17 +36,17 @@ const INITIAL_CRITERIA: CriterionState[] = [
     { category: 'y_thuc', criterionKey: '2-1', label: 'Lễ phép, chào hỏi đầy đủ', value: 10, maxValue: 10, deductions: [] },
     { category: 'y_thuc', criterionKey: '2-2', label: 'Giữ trật tự trong giờ học', value: 10, maxValue: 10, deductions: [] },
     { category: 'y_thuc', criterionKey: '2-3', label: 'Mặc võ phục đúng quy định', value: 10, maxValue: 10, deductions: [] },
-    // Chuyên Môn (20đ, mỗi mục 5đ) — mặc định đầy điểm
-    { category: 'chuyen_mon', criterionKey: '3-1', label: 'Kỹ thuật căn bản', value: 5, maxValue: 5, deductions: [] },
-    { category: 'chuyen_mon', criterionKey: '3-2', label: 'Đối luyện / Phản xạ', value: 5, maxValue: 5, deductions: [] },
-    { category: 'chuyen_mon', criterionKey: '3-3', label: 'Bài quyền', value: 5, maxValue: 5, deductions: [] },
-    { category: 'chuyen_mon', criterionKey: '3-4', label: 'Thể lực', value: 5, maxValue: 5, deductions: [] },
+    // Chuyên Môn (40đ, mỗi mục 10đ)
+    { category: 'chuyen_mon', criterionKey: '3-1', label: 'Kỹ thuật cơ bản', value: 10, maxValue: 10, deductions: [] },
+    { category: 'chuyen_mon', criterionKey: '3-2', label: 'Quyền thuật', value: 10, maxValue: 10, deductions: [] },
+    { category: 'chuyen_mon', criterionKey: '3-3', label: 'Đối kháng', value: 10, maxValue: 10, deductions: [] },
+    { category: 'chuyen_mon', criterionKey: '3-4', label: 'Thể lực', value: 10, maxValue: 10, deductions: [] },
 ];
 
 const CATEGORIES = [
     { key: 'chuyen_can', label: 'I. Chuyên Cần', icon: '🚀', gradient: 'from-orange-500 to-orange-700', max: 30, desc: 'Tập đều, không vắng mặt' },
     { key: 'y_thuc', label: 'II. Ý Thức – Kỷ Luật', icon: '⭐', gradient: 'from-green-500 to-green-700', max: 30, desc: 'Thái độ, kỷ luật' },
-    { key: 'chuyen_mon', label: 'III. Chuyên Môn', icon: '🥋', gradient: 'from-purple-500 to-purple-700', max: 20, desc: 'Kỹ thuật chuyên sâu' },
+    { key: 'chuyen_mon', label: 'III. Chuyên Môn', icon: '🥋', gradient: 'from-purple-500 to-purple-700', max: 40, desc: 'Kỹ thuật chuyên sâu' },
 ];
 
 export default function ScoreModal({ studentId, studentName, weekKey, onClose, autoChuyenCan }: ScoreModalProps) {
@@ -178,11 +178,11 @@ export default function ScoreModal({ studentId, studentName, weekKey, onClose, a
                 <div className="text-xs text-[var(--text-tertiary)] uppercase tracking-wider mb-1">Điểm Tích Lũy</div>
                 <div className="text-5xl font-bold text-yellow-400">{totalScore}<span className="text-sm text-[var(--text-tertiary)] ml-1">PT</span></div>
                 {/* Progress bar showing total */}
-                <ProgressBar value={(totalScore / 80) * 100} variant="warning" height="h-1.5" className="mt-3" />
+                <ProgressBar value={(totalScore / 100) * 100} variant="warning" height="h-1.5" className="mt-3" />
                 <div className="mt-2 text-xs text-[var(--accent-from)] flex justify-center gap-3">
                     <span>Chuyên Cần: <strong>{getCatScore('chuyen_can')}</strong>/30</span>
                     <span>Ý Thức: <strong>{getCatScore('y_thuc')}</strong>/30</span>
-                    <span>Chuyên Môn: <strong>{getCatScore('chuyen_mon')}</strong>/20</span>
+                    <span>Chuyên Môn: <strong>{getCatScore('chuyen_mon')}</strong>/40</span>
                 </div>
                 {typeof autoChuyenCan === 'number' && (
                     <div className="mt-2 text-xs text-emerald-400">
