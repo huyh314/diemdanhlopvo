@@ -263,17 +263,25 @@ export async function getGroupSummary(date?: string) {
         summaryMap.get(s.group_id)!.total_students++;
     });
 
-    // Populate daily attendance counts
+    // Populate daily attendance counts - ensure each student is counted at most once per day
+    const studentStatusMap = new Map<string, string>();
     (attendance || []).forEach(a => {
-        const student = (students || []).find(s => s.id === a.student_id);
-        if (!student) return;
+        // Priority: present > excused > absent
+        const existing = studentStatusMap.get(a.student_id);
+        if (!existing || a.status === 'present' || (a.status === 'excused' && existing === 'absent')) {
+            studentStatusMap.set(a.student_id, a.status);
+        }
+    });
 
-        const group = summaryMap.get(student.group_id);
+    // Sum up counts into groups
+    students.forEach(s => {
+        const group = summaryMap.get(s.group_id);
         if (!group) return;
 
-        if (a.status === 'present') group.present_count++;
-        else if (a.status === 'absent') group.absent_count++;
-        else if (a.status === 'excused') group.excused_count++;
+        const status = studentStatusMap.get(s.id);
+        if (status === 'present') group.present_count++;
+        else if (status === 'absent') group.absent_count++;
+        else if (status === 'excused') group.excused_count++;
     });
 
     // Calculate rates properly based only on students who were marked (or all students if needed)
