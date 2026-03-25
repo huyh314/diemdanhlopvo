@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -16,11 +17,12 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col font-['Outfit',sans-serif]" suppressHydrationWarning>
         {/* Martial Arts Theme Background */}
         <div className="fixed inset-0 z-[-1] pointer-events-none bg-[#0a0f1c]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/martial_arts_bg.png"
             alt="Dojo Background"
-            className="w-full h-full object-cover opacity-50 mix-blend-luminosity brightness-75"
+            fill
+            priority
+            className="object-cover opacity-50 mix-blend-luminosity brightness-75"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1c]/60 via-[#0a0f1c]/80 to-[#0a0f1c] pointer-events-none" />
         </div>

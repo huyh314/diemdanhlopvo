@@ -3,6 +3,7 @@
 // =============================================
 
 import { Suspense } from 'react';
+import Link from 'next/link';
 import GroupSummaryContent from './_components/GroupSummaryContent';
 import { GROUP_IDS, getGroupName } from '@/lib/constants';
 import AttendanceContent from './_components/AttendanceContent';
@@ -49,16 +50,17 @@ export default async function AttendancePage({
             {/* Group Tabs */}
             <div className="flex gap-2">
                 {GROUP_IDS.map((g) => (
-                    <a
+                    <Link
                         key={g}
                         href={`/attendance?group=${g}`}
+                        prefetch={true}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition ${g === groupId
                             ? 'bg-[var(--accent-from)]/20 text-blue-300 border border-[var(--accent-from)]/40 shadow-[var(--glass-shadow)]'
                             : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-transparent hover:bg-white/5'
                             }`}
                     >
                         {getGroupName(g)}
-                    </a>
+                    </Link>
                 ))}
             </div>
 

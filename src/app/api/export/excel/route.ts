@@ -8,6 +8,7 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const monthParam = searchParams.get('month');
         const yearParam = searchParams.get('year');
+        const isJsonMode = request.headers.get('Accept') === 'application/json';
 
         const now = new Date();
         const month = monthParam ? parseInt(monthParam) : now.getMonth() + 1;
@@ -72,6 +73,11 @@ export async function GET(request: Request) {
             ordered['Tổng Vắng'] = row['Tổng Vắng'];
             return ordered;
         });
+
+        // JSON mode: return preview data without generating file
+        if (isJsonMode) {
+            return NextResponse.json({ rows: finalData, dates: sortedDates, month, year });
+        }
 
         // Create Excel Workbook
         const worksheet = XLSX.utils.json_to_sheet(finalData);

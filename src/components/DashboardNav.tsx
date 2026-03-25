@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeSwitcher from './ThemeSwitcher';
 import AddStudentModal from './AddStudentModal';
@@ -45,9 +46,10 @@ export default function DashboardNav() {
                         {NAV_ITEMS.map((item) => {
                             const isActive = pathname.startsWith(item.href);
                             return (
-                                <a
+                                <Link
                                     key={item.href}
                                     href={item.href}
+                                    prefetch={true}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${isActive
                                         ? 'bg-[rgba(var(--accent-rgb-from),0.2)] text-[var(--accent-from)] border border-[rgba(var(--accent-rgb-from),0.3)]'
                                         : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/10'
@@ -55,7 +57,7 @@ export default function DashboardNav() {
                                 >
                                     <span>{item.icon}</span>
                                     <span className="hidden md:inline">{item.label}</span>
-                                </a>
+                                </Link>
                             );
                         })}
 

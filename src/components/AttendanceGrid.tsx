@@ -14,6 +14,8 @@ import { Button, Badge } from './ui';
 
 interface AttendanceGridProps {
     initialStudents: StudentRow[];
+    /** Trạng thái điểm danh đã lưu từ DB (nguồn chính xác khi load trang) */
+    initialStatuses?: Record<string, AttendanceStatus>;
     groupId: GroupId;
     sessionDate: string; // YYYY-MM-DD
 }
@@ -41,22 +43,25 @@ const STATUS_CONFIG: Record<AttendanceStatus, { label: string; icon: string; car
     },
 };
 
-export default function AttendanceGrid({ initialStudents, groupId, sessionDate }: AttendanceGridProps) {
+export default function AttendanceGrid({ initialStudents, initialStatuses, groupId, sessionDate }: AttendanceGridProps) {
     // Key unique cho mỗi nhóm + ngày để không trộn lẫn dữ liệu
     const DRAFT_KEY = `attendance_draft_${groupId}_${sessionDate}`;
 
     const [statuses, setStatuses] = useState<Record<string, AttendanceStatus>>(() => {
-        // Khởi tạo mặc định 'absent'
+        // 1. Xây dựng defaults từ initialStatuses (DB) — nguồn chính xác nhất
         const defaults: Record<string, AttendanceStatus> = {};
-        initialStudents.forEach((s) => { defaults[s.id] = 'absent'; });
+        initialStudents.forEach((s) => {
+            defaults[s.id] = (initialStatuses?.[s.id]) || 'absent';
+        });
 
-        // Thử khôi phục từ localStorage nếu đang chạy trên trình duyệt
+        // 2. Thử merge với localStorage (ưu tiên localStorage nếu mới hơn DB)
+        //    Chỉ áp dụng nếu localStorage có data — dùng làm fallback khi offline
         if (typeof window !== 'undefined') {
             try {
                 const saved = localStorage.getItem(DRAFT_KEY);
                 if (saved) {
                     const parsed = JSON.parse(saved) as Record<string, AttendanceStatus>;
-                    // Merge: chỉ lấy các key có trong danh sách học sinh hiện tại
+                    // Merge: localStorage ghi đè DB (vì có thể user đã thay đổi chưa lưu)
                     const merged: Record<string, AttendanceStatus> = { ...defaults };
                     initialStudents.forEach((s) => {
                         if (parsed[s.id]) merged[s.id] = parsed[s.id];
@@ -152,8 +157,9 @@ export default function AttendanceGrid({ initialStudents, groupId, sessionDate }
             if (!result.success) {
                 toast(result.error || 'Lỗi khi lưu điểm danh', 'error');
             } else {
-                // Xóa draft sau khi lưu thành công
-                try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+                // GIỮ NGUYÊN localStorage — không xóa draft sau khi lưu
+                // Trạng thái sẽ được load từ DB khi reload trang
+                // localStorage chỉ tự hết hiệu lực khi qua ngày mới (DRAFT_KEY mới)
                 toast(`Đã lưu điểm danh: ${stats.present} có mặt / ${stats.total} học sinh`, 'success');
                 setHasChanges(false);
             }
