@@ -15,11 +15,10 @@ export default async function AttendanceContent({
         getTodayAttendance(today, groupId),
     ]);
 
-    // Chuyển map thành kiểu AttendanceStatus
+    // Tìm các bản ghi thực sự tồn tại trong DB cho ngày hôm nay
     const initialStatuses: Record<string, AttendanceStatus> = {};
-    students.forEach((s) => {
-        const saved = todayMap[s.id];
-        initialStatuses[s.id] = (saved as AttendanceStatus) || 'absent';
+    Object.entries(todayMap).forEach(([id, status]) => {
+        initialStatuses[id] = status as AttendanceStatus;
     });
 
     return (

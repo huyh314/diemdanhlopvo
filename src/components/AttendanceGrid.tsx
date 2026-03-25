@@ -48,27 +48,37 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
     const DRAFT_KEY = `attendance_draft_${groupId}_${sessionDate}`;
 
     const [statuses, setStatuses] = useState<Record<string, AttendanceStatus>>(() => {
-        // 1. Xây dựng defaults từ initialStatuses (DB) — nguồn chính xác nhất
+        // 1. Xây dựng defaults từ initialStudents
         const defaults: Record<string, AttendanceStatus> = {};
         initialStudents.forEach((s) => {
             defaults[s.id] = (initialStatuses?.[s.id]) || 'absent';
         });
 
-        // 2. Thử merge với localStorage (ưu tiên localStorage nếu mới hơn DB)
-        //    Chỉ áp dụng nếu localStorage có data — dùng làm fallback khi offline
+        // 2. Logic ưu tiên: DB > localStorage > 'absent'
         if (typeof window !== 'undefined') {
+            const hasDataInDB = initialStatuses && Object.keys(initialStatuses).length > 0;
+
+            if (hasDataInDB) {
+                // Nếu DB đã có data, ta tin tưởng DB. 
+                // Xóa draft cũ trong localStorage vì nó có thể là từ lúc chưa save hoặc của phiên cũ.
+                try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+                return defaults;
+            }
+
             try {
                 const saved = localStorage.getItem(DRAFT_KEY);
                 if (saved) {
                     const parsed = JSON.parse(saved) as Record<string, AttendanceStatus>;
-                    // Merge: localStorage ghi đè DB (vì có thể user đã thay đổi chưa lưu)
-                    const merged: Record<string, AttendanceStatus> = { ...defaults };
-                    initialStudents.forEach((s) => {
-                        if (parsed[s.id]) merged[s.id] = parsed[s.id];
-                    });
-                    return merged;
+                    // Chỉ merge nếu thực sự có data trong draft
+                    if (Object.keys(parsed).length > 0) {
+                        const merged: Record<string, AttendanceStatus> = { ...defaults };
+                        initialStudents.forEach((s) => {
+                            if (parsed[s.id]) merged[s.id] = parsed[s.id];
+                        });
+                        return merged;
+                    }
                 }
-            } catch { /* bỏ qua lỗi parse */ }
+            } catch { /* ignore */ }
         }
         return defaults;
     });
@@ -157,9 +167,10 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
             if (!result.success) {
                 toast(result.error || 'Lỗi khi lưu điểm danh', 'error');
             } else {
-                // GIỮ NGUYÊN localStorage — không xóa draft sau khi lưu
-                // Trạng thái sẽ được load từ DB khi reload trang
-                // localStorage chỉ tự hết hiệu lực khi qua ngày mới (DRAFT_KEY mới)
+                // XÓA localStorage sau khi lưu thành công
+                // Điều này đảm bảo khi reload trang, hệ thống sẽ lấy data mới nhất từ DB
+                try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+
                 toast(`Đã lưu điểm danh: ${stats.present} có mặt / ${stats.total} học sinh`, 'success');
                 setHasChanges(false);
             }
