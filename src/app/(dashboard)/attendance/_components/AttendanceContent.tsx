@@ -23,6 +23,7 @@ export default async function AttendanceContent({
 
     return (
         <AttendanceGrid
+            key={`${groupId}-${today}`}
             initialStudents={students}
             initialStatuses={initialStatuses}
             groupId={groupId}
