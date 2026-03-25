@@ -4,7 +4,6 @@
 // =============================================
 
 import 'server-only';
-import { unstable_cache } from 'next/cache';
 import { createClient } from '@/utils/supabase/server';
 import type {
     Database,
@@ -24,26 +23,22 @@ import { GROUP_IDS } from '@/lib/constants';
 // STUDENTS
 // =============================================
 
-export const getStudents = unstable_cache(
-    async (groupId?: GroupId) => {
-        const supabase = await createClient();
-        let query = supabase
-            .from('students')
-            .select('*')
-            .eq('is_active', true)
-            .order('name', { ascending: true });
+export async function getStudents(groupId?: GroupId) {
+    const supabase = await createClient();
+    let query = supabase
+        .from('students')
+        .select('*')
+        .eq('is_active', true)
+        .order('name', { ascending: true });
 
-        if (groupId) {
-            query = query.eq('group_id', groupId);
-        }
+    if (groupId) {
+        query = query.eq('group_id', groupId);
+    }
 
-        const { data, error } = await query;
-        if (error) throw new Error(`Failed to fetch students: ${error.message}`);
-        return data as StudentRow[];
-    },
-    ['students-list'],
-    { revalidate: 300, tags: ['students'] } // cache 5 phút
-);
+    const { data, error } = await query;
+    if (error) throw new Error(`Failed to fetch students: ${error.message}`);
+    return data as StudentRow[];
+}
 
 export async function getStudent(id: string) {
     const supabase = await createClient();
@@ -204,20 +199,16 @@ export async function getAttendanceStats(params?: {
     return data as AttendanceStatsRow[];
 }
 
-export const getStudentRankings = unstable_cache(
-    async (weekKey?: string) => {
-        const supabase = await createClient();
-        const { data, error } = await supabase
-            .rpc('fn_student_rankings', {
-                p_week_key: weekKey ?? null,
-            });
+export async function getStudentRankings(weekKey?: string) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .rpc('fn_student_rankings', {
+            p_week_key: weekKey ?? null,
+        });
 
-        if (error) throw new Error(`Failed to fetch rankings: ${error.message}`);
-        return data as StudentRankingRow[];
-    },
-    ['student-rankings'],
-    { revalidate: 120, tags: ['rankings'] } // cache 2 phút
-);
+    if (error) throw new Error(`Failed to fetch rankings: ${error.message}`);
+    return data as StudentRankingRow[];
+}
 
 export interface StudentAverageRankingRow {
     rank: number;
@@ -243,64 +234,62 @@ export async function getAverageRankings(weeks: number = 4) {
     return data as unknown as StudentAverageRankingRow[];
 }
 
-export const getGroupSummary = unstable_cache(
-    async (date?: string) => {
-        const supabase = await createClient();
-        const targetDate = date ?? new Date().toISOString().slice(0, 10);
+export async function getGroupSummary(date?: string) {
+    const supabase = await createClient();
+    const targetDate = date ?? new Date().toISOString().slice(0, 10);
 
-        const [{ data: students, error: stuErr }, { data: attendance, error: attErr }] = await Promise.all([
-            supabase.from('students').select('id, group_id').eq('is_active', true),
-            supabase.from('attendance').select('student_id, status, sessions!inner(session_date)').eq('sessions.session_date', targetDate)
-        ]);
+    const [{ data: students, error: stuErr }, { data: attendance, error: attErr }] = await Promise.all([
+        supabase.from('students').select('id, group_id').eq('is_active', true),
+        supabase.from('attendance').select('student_id, status, sessions!inner(session_date)').eq('sessions.session_date', targetDate)
+    ]);
 
-        if (stuErr) throw new Error(`Failed to fetch students: ${stuErr.message}`);
-        if (attErr) throw new Error(`Failed to fetch attendance: ${attErr.message}`);
+    if (stuErr) throw new Error(`Failed to fetch students: ${stuErr.message}`);
+    if (attErr) throw new Error(`Failed to fetch attendance: ${attErr.message}`);
 
-        const summaryMap = new Map<string, GroupAttendanceSummaryRow>();
+    const summaryMap = new Map<string, GroupAttendanceSummaryRow>();
 
-        // Register active students to groups
-        (students || []).forEach(s => {
-            if (!summaryMap.has(s.group_id)) {
-                summaryMap.set(s.group_id, {
-                    group_id: s.group_id,
-                    total_students: 0,
-                    present_count: 0,
-                    absent_count: 0,
-                    excused_count: 0,
-                    rate: 0
-                });
-            }
-            summaryMap.get(s.group_id)!.total_students++;
-        });
+    // Register active students to groups
+    (students || []).forEach(s => {
+        if (!summaryMap.has(s.group_id)) {
+            summaryMap.set(s.group_id, {
+                group_id: s.group_id,
+                total_students: 0,
+                present_count: 0,
+                absent_count: 0,
+                excused_count: 0,
+                rate: 0
+            });
+        }
+        summaryMap.get(s.group_id)!.total_students++;
+    });
 
-        // Populate daily attendance counts
-        (attendance || []).forEach(a => {
-            const student = (students || []).find(s => s.id === a.student_id);
-            if (!student) return;
+    // Populate daily attendance counts
+    (attendance || []).forEach(a => {
+        const student = (students || []).find(s => s.id === a.student_id);
+        if (!student) return;
 
-            const group = summaryMap.get(student.group_id);
-            if (!group) return;
+        const group = summaryMap.get(student.group_id);
+        if (!group) return;
 
-            if (a.status === 'present') group.present_count++;
-            else if (a.status === 'absent') group.absent_count++;
-            else if (a.status === 'excused') group.excused_count++;
-        });
+        if (a.status === 'present') group.present_count++;
+        else if (a.status === 'absent') group.absent_count++;
+        else if (a.status === 'excused') group.excused_count++;
+    });
 
-        const result = Array.from(summaryMap.values());
-        result.forEach(group => {
-            const totalChecked = group.present_count + group.absent_count + group.excused_count;
-            if (totalChecked === 0) {
-                group.rate = 0;
-            } else {
-                group.rate = Math.round((group.present_count / totalChecked) * 100);
-            }
-        });
+    // Calculate rates properly based only on students who were marked (or all students if needed)
+    // The previous SQL calculated rate based on total marked present / total marked.
+    const result = Array.from(summaryMap.values());
+    result.forEach(group => {
+        const totalChecked = group.present_count + group.absent_count + group.excused_count;
+        if (totalChecked === 0) {
+            group.rate = 0;
+        } else {
+            group.rate = Math.round((group.present_count / totalChecked) * 100);
+        }
+    });
 
-        return result.sort((a, b) => a.group_id.localeCompare(b.group_id));
-    },
-    ['group-summary'],
-    { revalidate: 60, tags: ['attendance'] } // cache 1 phút
-);
+    return result.sort((a, b) => a.group_id.localeCompare(b.group_id));
+}
 
 export async function getAutoChuyenCan(
     studentId: string,
