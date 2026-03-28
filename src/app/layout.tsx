@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import './globals.css';
-
+import ParticleBackground from '@/components/ui/ParticleBackground';
 export const metadata: Metadata = {
   title: 'Võ Đường Manager',
   description: 'Hệ thống quản lý điểm danh và xếp hạng võ sinh',
@@ -25,6 +25,7 @@ export default function RootLayout({
             className="object-cover opacity-50 mix-blend-luminosity brightness-75"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1c]/60 via-[#0a0f1c]/80 to-[#0a0f1c] pointer-events-none" />
+          <ParticleBackground />
         </div>
 
         <div className="relative z-10 flex flex-col min-h-screen">

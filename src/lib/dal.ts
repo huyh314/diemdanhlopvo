@@ -236,7 +236,7 @@ export async function getAverageRankings(weeks: number = 4) {
 
 export async function getGroupSummary(date?: string) {
     const supabase = await createClient();
-    const targetDate = date ?? new Date().toISOString().slice(0, 10);
+    const targetDate = date ?? new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
 
     const [{ data: students, error: stuErr }, { data: attendance, error: attErr }] = await Promise.all([
         supabase.from('students').select('id, group_id').eq('is_active', true),

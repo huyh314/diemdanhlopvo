@@ -21,10 +21,8 @@ export default async function DashboardLayout({
 
     return (
         <ToastProvider>
-            <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
-                {/* Aurora Background */}
-                <div className="aurora-bg" />
-                <div className="aurora-blob" />
+            <div className="min-h-screen bg-transparent text-[var(--text-primary)]">
+
 
                 {/* Nav */}
                 <DashboardNav />

@@ -101,7 +101,7 @@ export default function ScoreModal({ studentId, studentName, weekKey, onClose, a
         setCriteria((prev) =>
             prev.map((c) =>
                 c.criterionKey === criterionKey
-                    ? { ...c, deductions: [...c.deductions, { reason, amount, date: new Date().toISOString().slice(0, 10) }] }
+                    ? { ...c, deductions: [...c.deductions, { reason, amount, date: new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' }) }] }
                     : c
             )
         );

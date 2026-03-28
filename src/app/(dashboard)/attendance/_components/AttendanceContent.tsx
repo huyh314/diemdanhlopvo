@@ -4,18 +4,18 @@ import AttendanceGrid from '@/components/AttendanceGrid';
 
 export default async function AttendanceContent({
     groupId,
-    today,
+    selectedDate,
 }: {
     groupId: GroupId;
-    today: string;
+    selectedDate: string;
 }) {
-    // Lấy danh sách học sinh và trạng thái điểm danh hôm nay song song
+    // Lấy danh sách học sinh và trạng thái điểm danh ngày đã chọn song song
     const [students, todayMap] = await Promise.all([
         getStudents(groupId),
-        getTodayAttendance(today, groupId),
+        getTodayAttendance(selectedDate, groupId),
     ]);
 
-    // Tìm các bản ghi thực sự tồn tại trong DB cho ngày hôm nay
+    // Tìm các bản ghi thực sự tồn tại trong DB cho ngày đã chọn
     const initialStatuses: Record<string, AttendanceStatus> = {};
     Object.entries(todayMap).forEach(([id, status]) => {
         initialStatuses[id] = status as AttendanceStatus;
@@ -23,11 +23,11 @@ export default async function AttendanceContent({
 
     return (
         <AttendanceGrid
-            key={`${groupId}-${today}`}
+            key={`${groupId}-${selectedDate}`}
             initialStudents={students}
             initialStatuses={initialStatuses}
             groupId={groupId}
-            sessionDate={today}
+            sessionDate={selectedDate}
         />
     );
 }

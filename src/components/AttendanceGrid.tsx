@@ -26,19 +26,19 @@ const STATUS_CONFIG: Record<AttendanceStatus, { label: string; icon: string; car
     absent: {
         label: 'Vắng',
         icon: '',
-        cardClass: 'bg-[var(--status-absent-bg)] border-[var(--border-secondary)] opacity-60 hover:opacity-100',
+        cardClass: 'bg-[var(--bg-card)] border-2 border-[var(--border-secondary)] shadow-[0_8px_16px_rgba(0,0,0,0.6),inset_0_2px_4px_rgba(255,255,255,0.05)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.8),inset_0_2px_4px_rgba(255,255,255,0.1)] hover:-translate-y-1 hover:border-[var(--border-primary)]',
         badgeVariant: 'danger',
     },
     present: {
         label: 'Có mặt',
         icon: '✓',
-        cardClass: 'bg-gradient-to-br from-[var(--status-present-from)] to-[var(--status-present-to)] border-[var(--status-present-border)] shadow-[var(--status-present-shadow)]',
+        cardClass: 'bg-emerald-900/60 border-2 border-emerald-500 shadow-[0_8px_20px_rgba(16,185,129,0.3),inset_0_2px_4px_rgba(255,255,255,0.1)] hover:shadow-[0_12px_28px_rgba(16,185,129,0.4),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:-translate-y-1',
         badgeVariant: 'success',
     },
     excused: {
         label: 'Có phép',
         icon: 'P',
-        cardClass: 'bg-gradient-to-br from-[var(--status-excused-from)] to-[var(--status-excused-to)] border-[var(--status-excused-border)] shadow-[var(--status-excused-shadow)]',
+        cardClass: 'bg-yellow-900/60 border-2 border-yellow-500 shadow-[0_8px_20px_rgba(234,179,8,0.3),inset_0_2px_4px_rgba(255,255,255,0.1)] hover:shadow-[0_12px_28px_rgba(234,179,8,0.4),inset_0_2px_4px_rgba(255,255,255,0.2)] hover:-translate-y-1',
         badgeVariant: 'warning',
     },
 };
@@ -84,16 +84,27 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
     });
     const [search, setSearch] = useState('');
     const [isPending, startTransition] = useTransition();
-    const [hasChanges, setHasChanges] = useState(false);
-    const { toast } = useToast();
     const gridRef = useRef<HTMLDivElement>(null);
+    const { toast } = useToast();
+
+    // Tính toán hasChanges tự động dựa trên so sánh statuses và initialStatuses
+    const hasChanges = useMemo(() => {
+        for (const s of initialStudents) {
+            const defaultStatus = initialStatuses?.[s.id] || 'absent';
+            if (statuses[s.id] !== defaultStatus) return true;
+        }
+        return false;
+    }, [statuses, initialStudents, initialStatuses]);
 
     // Tự động lưu vào localStorage mỗi lần statuses thay đổi
     useEffect(() => {
         try {
-            localStorage.setItem(DRAFT_KEY, JSON.stringify(statuses));
+            if (hasChanges) {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(statuses));
+            }
         } catch { /* bỏ qua nếu localStorage đầy */ }
-    }, [statuses, DRAFT_KEY]);
+    }, [statuses, DRAFT_KEY, hasChanges]);
+
 
     // Filter students
     const filtered = useMemo(() => {
@@ -147,7 +158,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
             const next = STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length];
             return { ...prev, [studentId]: next };
         });
-        setHasChanges(true);
     }
 
     // Save all
@@ -172,7 +182,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
                 try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
 
                 toast(`Đã lưu điểm danh: ${stats.present} có mặt / ${stats.total} học sinh`, 'success');
-                setHasChanges(false);
             }
         });
     }
@@ -226,6 +235,19 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
                         {attendanceRate}%
                     </span>
                 </div>
+
+                {/* Nút Lưu mới - cạnh thanh chỉ số */}
+                <Button
+                    variant="primary"
+                    size="md"
+                    onClick={handleSave}
+                    disabled={isPending || !hasChanges}
+                    loading={isPending}
+                    className={`ml-auto shadow-lg transition-all duration-500 ${hasChanges ? 'scale-100 opacity-100 ring-2 ring-[var(--accent-from)]/50' : 'scale-95 opacity-50 grayscale'
+                        }`}
+                >
+                    {isPending ? 'Đang lưu...' : '💾 LƯU THAY ĐỔI'}
+                </Button>
             </div>
 
             {/* Search */}
@@ -255,9 +277,8 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
                             id={`card-${student.id}`}
                             onClick={() => toggleStatus(student.id)}
                             aria-pressed={status !== 'absent'}
-                            className={`student-card glass-card relative rounded-[20px] border p-4 text-center cursor-pointer group transform-gpu transition-shadow duration-[var(--transition-normal)]
+                            className={`student-card relative rounded-[20px] p-4 text-center cursor-pointer group transform-gpu transition-all duration-300
                                 ${config.cardClass}
-                                hover:border-[var(--border-primary)] hover:shadow-[0_15px_35px_rgba(0,0,0,0.2)]
                             `}
                         >
                             {/* Status badge */}
@@ -309,19 +330,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
                 </div>
             )}
 
-            {/* Floating Save Button */}
-            {hasChanges && (
-                <Button
-                    variant="primary"
-                    size="lg"
-                    onClick={handleSave}
-                    disabled={isPending}
-                    loading={isPending}
-                    className="!fixed bottom-6 right-6 !rounded-full z-40 shadow-2xl shadow-[rgba(var(--accent-rgb-from),0.4)] !text-lg"
-                >
-                    {isPending ? 'Đang lưu...' : '💾 LƯU'}
-                </Button>
-            )}
         </div>
     );
 }
