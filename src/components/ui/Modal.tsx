@@ -50,9 +50,9 @@ export default function Modal({
                 ref={contentRef}
                 className={`
                     bg-[var(--glass-bg)] border border-[var(--glass-border)]
-                    rounded-3xl p-6 w-full shadow-[var(--glass-shadow)]
-                    max-h-[90vh] overflow-y-auto backdrop-blur-[var(--glass-blur)]
-                    animate-modal-in transform-gpu
+                    rounded-3xl p-6 w-[calc(100%-2rem)] sm:w-full shadow-[var(--glass-shadow)]
+                    max-h-[85vh] sm:max-h-[90vh] overflow-y-auto backdrop-blur-[var(--glass-blur)]
+                    animate-modal-in transform-gpu mx-4 sm:mx-auto
                     ${maxWidth}
                     ${className}
                 `}

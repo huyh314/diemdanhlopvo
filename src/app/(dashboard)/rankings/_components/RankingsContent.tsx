@@ -108,7 +108,7 @@ export default async function RankingsContent({ week, mode = 'weekly', weeks = 4
 
             <div className="rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-primary)] backdrop-blur-[var(--glass-blur)] shadow-[var(--glass-shadow)] overflow-hidden">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full text-sm min-w-[800px] md:min-w-full">
                         <thead>
                             <tr className="border-b border-[var(--border-primary)] bg-white/[0.02]">
                                 <th className="px-4 py-3 text-left text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider w-16">Hạng</th>

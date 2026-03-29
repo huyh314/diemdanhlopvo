@@ -28,7 +28,7 @@ export default async function DashboardLayout({
                 <DashboardNav />
 
                 {/* Page Content */}
-                <main className="relative z-10 max-w-7xl mx-auto px-4 py-6">
+                <main className="relative z-10 max-w-7xl mx-auto px-4 pt-6 pb-24 md:pb-6">
                     {children}
                 </main>
             </div>

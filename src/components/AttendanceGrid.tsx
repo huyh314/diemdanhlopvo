@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useToast } from './Toast';
@@ -50,6 +51,11 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
     const DRAFT_KEY = `attendance_draft_${groupId}_${sessionDate}`;
 
     const { playClick } = useSoundEffects();
+    
+    // Khởi tạo state mounted để xử lý hydration an toàn cho UI portal
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
     const [statuses, setStatuses] = useState<Record<string, AttendanceStatus>>(() => {
         // ... (existing logic)
         // 1. Xây dựng defaults từ initialStudents
@@ -225,38 +231,62 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
     return (
         <div className="space-y-4">
             {/* Stats Bar */}
-            <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-secondary)] rounded-xl px-4 py-2 backdrop-blur-xl shadow-sm">
-                    <span className="text-xs text-[var(--text-tertiary)] uppercase tracking-wider">Có mặt</span>
-                    <span className="text-lg font-bold text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.4)]">{stats.present}</span>
+            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                <div className="flex items-center gap-1.5 sm:gap-2 bg-[var(--bg-card)] border border-[var(--border-secondary)] rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 backdrop-blur-xl shadow-sm">
+                    <span className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">Có mặt</span>
+                    <span className="text-base sm:text-lg font-bold text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.4)]">{stats.present}</span>
                 </div>
-                <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-secondary)] rounded-xl px-4 py-2 backdrop-blur-xl shadow-sm">
-                    <span className="text-xs text-[var(--text-tertiary)] uppercase tracking-wider">Vắng</span>
-                    <span className="text-lg font-bold text-red-400">{stats.absent}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 bg-[var(--bg-card)] border border-[var(--border-secondary)] rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 backdrop-blur-xl shadow-sm">
+                    <span className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">Vắng</span>
+                    <span className="text-base sm:text-lg font-bold text-red-400">{stats.absent}</span>
                 </div>
-                <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-secondary)] rounded-xl px-4 py-2 backdrop-blur-xl shadow-sm">
-                    <span className="text-xs text-[var(--text-tertiary)] uppercase tracking-wider">Phép</span>
-                    <span className="text-lg font-bold text-yellow-400">{stats.excused}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 bg-[var(--bg-card)] border border-[var(--border-secondary)] rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 backdrop-blur-xl shadow-sm">
+                    <span className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">Phép</span>
+                    <span className="text-base sm:text-lg font-bold text-yellow-400">{stats.excused}</span>
                 </div>
-                <div className="flex items-center gap-2 bg-[var(--bg-card)] border border-[var(--border-secondary)] rounded-xl px-4 py-2 backdrop-blur-xl shadow-sm">
-                    <span className="text-xs text-[var(--text-tertiary)] uppercase tracking-wider">Tỉ lệ</span>
-                    <span className={`text-lg font-bold ${attendanceRate >= 80 ? 'text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.4)]' : attendanceRate >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                <div className="flex items-center gap-1.5 sm:gap-2 bg-[var(--bg-card)] border border-[var(--border-secondary)] rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 backdrop-blur-xl shadow-sm">
+                    <span className="text-[10px] sm:text-xs text-[var(--text-tertiary)] uppercase tracking-wider">Tỉ lệ</span>
+                    <span className={`text-base sm:text-lg font-bold ${attendanceRate >= 80 ? 'text-emerald-400 drop-shadow-[0_0_10px_rgba(52,211,153,0.4)]' : attendanceRate >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
                         {attendanceRate}%
                     </span>
                 </div>
 
-                {/* Nút Lưu mới - cạnh thanh chỉ số */}
+                {/* Nút Lưu - Inline Desktop */}
                 <Button
                     variant="primary"
                     size="md"
                     onClick={handleSave}
                     disabled={isPending || !hasChanges}
                     loading={isPending}
-                    className={`ml-auto shadow-lg transition-all duration-500 ${hasChanges ? 'scale-100 opacity-100 ring-2 ring-[var(--accent-from)]/50' : 'scale-95 opacity-50 grayscale'
-                        }`}
+                    className={`hidden md:flex ml-auto shadow-lg transition-all duration-500 rounded-lg px-6 py-2.5 items-center gap-2 group ${hasChanges 
+                        ? 'scale-100 opacity-100 ring-2 ring-[var(--accent-from)]/50 bg-[var(--accent-from)] text-white' 
+                        : 'scale-95 opacity-50 grayscale pointer-events-auto'
+                    }`}
                 >
-                    {isPending ? 'Đang lưu...' : '💾 LƯU THAY ĐỔI'}
+                    <span className="text-base leading-none">💾</span>
+                    <span className="font-extrabold uppercase tracking-wider text-xs">{isPending ? 'Đang lưu' : 'Lưu Lại'}</span>
                 </Button>
+
+                {/* Nút Lưu - Floating Mobile (Dùng Portal để thoát khỏi motion.div CSS Context Transform) */}
+                {mounted && typeof document !== 'undefined' && createPortal(
+                    <div className="md:hidden">
+                        <Button
+                            variant="primary"
+                            size="md"
+                            onClick={handleSave}
+                            disabled={isPending || !hasChanges}
+                            loading={isPending}
+                            className={`fixed bottom-[150px] right-4 z-[9999] shadow-[0_15px_40px_rgba(0,0,0,0.8)] transition-all duration-500 rounded-[1.25rem] px-5 py-3.5 flex flex-col items-center gap-1.5 group border border-white/20 ${hasChanges 
+                                ? 'translate-y-0 scale-100 opacity-100 ring-4 ring-emerald-500/40 bg-gradient-to-br from-emerald-500 to-emerald-700 text-white hover:scale-105 active:scale-95' 
+                                : 'translate-y-10 scale-50 opacity-0 pointer-events-none'
+                            }`}
+                        >
+                            <span className="text-2xl leading-none drop-shadow-md">💾</span>
+                            <span className="font-extrabold uppercase tracking-widest text-[10px] drop-shadow-md">{isPending ? 'Đang lưu' : 'Lưu Khóa'}</span>
+                        </Button>
+                    </div>,
+                    document.body
+                )}
             </div>
 
             {/* Search */}

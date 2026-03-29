@@ -165,15 +165,15 @@ export default function ScoreModal({ studentId, studentName, weekKey, onClose, a
             className="!p-0 overflow-hidden"
         >
             {/* Custom Header */}
-            <div className="bg-gradient-to-r from-[var(--bg-tertiary)] to-[var(--bg-secondary)] p-5 border-b border-[var(--border-primary)] flex justify-between items-center sticky top-0 z-10">
-                <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">🏆</span>
+            <div className="bg-gradient-to-r from-[var(--bg-tertiary)] to-[var(--bg-secondary)] p-4 sm:p-5 border-b border-[var(--border-primary)] flex justify-between items-center sticky top-0 z-10">
+                <div className="flex items-center gap-2 sm:gap-2.5">
+                    <span className="text-xl sm:text-2xl">🏆</span>
                     <div>
-                        <div className="text-lg font-bold text-yellow-400">Bảng Điểm Thi Đua</div>
-                        <div className="text-sm text-[var(--text-secondary)]">{studentName}</div>
+                        <div className="text-base sm:text-lg font-bold text-yellow-400">Bảng Điểm Thi Đua</div>
+                        <div className="text-xs sm:text-sm text-[var(--text-secondary)] leading-tight line-clamp-1 pr-2">{studentName}</div>
                     </div>
                 </div>
-                <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-yellow-400 transition text-xl w-8 h-8 flex items-center justify-center rounded">
+                <button onClick={onClose} className="text-[var(--text-tertiary)] hover:text-yellow-400 transition text-xl w-8 h-8 flex items-center justify-center rounded shrink-0 bg-white/5 sm:bg-transparent">
                     ✕
                 </button>
             </div>

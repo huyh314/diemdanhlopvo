@@ -59,7 +59,7 @@ export default function BackgroundMusic() {
       
       {/* Floating Audio Controls Container */}
       <div 
-        className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-3"
+        className="fixed bottom-[90px] md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-center gap-3"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >

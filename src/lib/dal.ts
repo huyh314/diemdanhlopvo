@@ -116,6 +116,7 @@ export async function getSessionAttendance(sessionId: string) {
       students (id, name, group_id, avatar_url)
     `)
         .eq('session_id', sessionId)
+        .eq('students.is_active', true)
         .order('recorded_at', { ascending: true });
 
     if (error) throw new Error(`Failed to fetch attendance: ${error.message}`);
@@ -144,8 +145,9 @@ export async function getTodayAttendance(
 
     const { data, error } = await supabase
         .from('attendance')
-        .select('student_id, status')
-        .eq('session_id', sessionData.id);
+        .select('student_id, status, students!inner(is_active)')
+        .eq('session_id', sessionData.id)
+        .eq('students.is_active', true);
 
     if (error) throw new Error(`Failed to fetch today attendance: ${error.message}`);
 
@@ -333,8 +335,9 @@ export async function getMonthlyExportData(year: number, month: number) {
         .select(`
             status,
             sessions!inner(session_date),
-            students!inner(name, group_id)
+            students!inner(name, group_id, is_active)
         `)
+        .eq('students.is_active', true)
         .gte('sessions.session_date', startDate)
         .lt('sessions.session_date', endDate);
 
