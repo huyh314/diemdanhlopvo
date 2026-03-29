@@ -49,14 +49,19 @@ const CATEGORIES = [
     { key: 'chuyen_mon', label: 'III. Chuyên Môn', icon: '🥋', gradient: 'from-purple-500 to-purple-700', max: 40, desc: 'Kỹ thuật chuyên sâu' },
 ];
 
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+
 export default function ScoreModal({ studentId, studentName, weekKey, onClose, autoChuyenCan }: ScoreModalProps) {
     const [criteria, setCriteria] = useState<CriterionState[]>(INITIAL_CRITERIA);
     const [notes, setNotes] = useState('');
+    const { playClick } = useSoundEffects();
+
     // Mặc định mở rộng tất cả các category
     const [expandedCats, setExpandedCats] = useState<Set<string>>(
         new Set(['chuyen_can', 'y_thuc', 'chuyen_mon'])
     );
     const toggleCat = (catKey: string) => {
+        playClick();
         setExpandedCats(prev => {
             const next = new Set(prev);
             if (next.has(catKey)) next.delete(catKey);

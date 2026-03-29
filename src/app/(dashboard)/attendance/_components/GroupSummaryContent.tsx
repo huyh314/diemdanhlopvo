@@ -48,35 +48,6 @@ export default async function GroupSummaryContent() {
                 />
             </div>
 
-            {/* Department Views / Group Breakdown */}
-            <div>
-                <h3 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wider mb-3">Tỉ Lệ Chuyên Cần Theo Nhóm</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {groupSummary.map((g) => (
-                        <div
-                            key={g.group_id}
-                            className="rounded-xl bg-[var(--bg-secondary)] border border-[var(--border-primary)] shadow-[var(--glass-shadow)] p-4 backdrop-blur-[var(--glass-blur)] transition-all duration-[var(--transition-normal)] hover:-translate-y-1 hover:shadow-xl"
-                        >
-                            <div className="flex items-center justify-between mb-2">
-                                {getGroupName(g.group_id)}
-                                <span className="text-xs font-mono text-[var(--text-muted)]">
-                                    {g.present_count}/{g.total_students}
-                                </span>
-                            </div>
-                            <div className="text-2xl font-bold bg-gradient-to-br from-[var(--accent-from)] to-[var(--accent-to)] bg-clip-text text-transparent">
-                                {g.rate}%
-                            </div>
-                            <div className="mt-2 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                <div
-                                    className="h-full rounded-full bg-gradient-to-r from-[var(--accent-from)] to-[var(--accent-to)] transition-all duration-1000 ease-out flex items-center justify-end pr-1 box-border"
-                                    style={{ width: `${g.rate}%` }}
-                                >
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
         </div>
     );
 }

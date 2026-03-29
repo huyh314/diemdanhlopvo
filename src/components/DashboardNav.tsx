@@ -7,6 +7,8 @@ import ThemeSwitcher from './ThemeSwitcher';
 import AddStudentModal from './AddStudentModal';
 import { Button } from './ui';
 
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+
 // =============================================
 // DASHBOARD NAV — Client Component for interactivity
 // =============================================
@@ -20,6 +22,7 @@ const NAV_ITEMS = [
 export default function DashboardNav() {
     const pathname = usePathname();
     const [showAddModal, setShowAddModal] = useState(false);
+    const { playClick } = useSoundEffects();
 
     return (
         <>
@@ -50,6 +53,7 @@ export default function DashboardNav() {
                                     key={item.href}
                                     href={item.href}
                                     prefetch={true}
+                                    onClick={playClick}
                                     className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${isActive
                                         ? 'bg-[rgba(var(--accent-rgb-from),0.2)] text-[var(--accent-from)] border border-[rgba(var(--accent-rgb-from),0.3)]'
                                         : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/10'

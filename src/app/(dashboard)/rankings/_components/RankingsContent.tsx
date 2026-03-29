@@ -2,6 +2,7 @@ import { getStudentRankings, getAverageRankings } from '@/lib/dal';
 import PdfExporter from '@/components/PdfExporter';
 import ScoreButton from '@/components/ScoreButton';
 import { getGroupShortName } from '@/lib/constants';
+import Link from 'next/link';
 
 export default async function RankingsContent({ week, mode = 'weekly', weeks = 4 }: { week?: string; mode?: string; weeks?: number }) {
     const isAverage = mode === 'average';
@@ -21,24 +22,24 @@ export default async function RankingsContent({ week, mode = 'weekly', weeks = 4
 
                 <div className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10 flex-wrap gap-4">
                     <div className="flex gap-2">
-                        <a
+                        <Link
                             href="/rankings/batch-grade"
                             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold bg-gradient-to-r from-orange-500 to-[var(--gold)] text-amber-950 hover:brightness-110 transition shadow-[0_0_15px_rgba(245,166,35,0.3)] mr-2"
                         >
                             ⚡ Chấm Điểm Hàng Loạt
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             href={`/rankings?mode=weekly${week ? `&week=${week}` : ''}`}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${!isAverage ? 'bg-[var(--accent-from)]/20 text-blue-300 border border-[var(--accent-from)]/40 shadow-[var(--glass-shadow)]' : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-transparent hover:bg-white/5'}`}
                         >
                             Theo Tuần
-                        </a>
-                        <a
+                        </Link>
+                        <Link
                             href={`/rankings?mode=average&weeks=${weeks}`}
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition ${isAverage ? 'bg-[var(--accent-from)]/20 text-blue-300 border border-[var(--accent-from)]/40 shadow-[var(--glass-shadow)]' : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-transparent hover:bg-white/5'}`}
                         >
                             Trung Bình
-                        </a>
+                        </Link>
                     </div>
 
                     {isAverage ? (

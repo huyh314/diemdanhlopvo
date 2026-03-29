@@ -110,7 +110,8 @@ export default function BatchGradingClient({
 }) {
     const { toast } = useToast();
     const router = useRouter();
-    const [isPending, startTransition] = useTransition();
+    const [isSaving, startSaveTransition] = useTransition();
+    const [isSwitchingTab, startTabTransition] = useTransition();
 
     const [activeKey, setActiveKey] = useState<string>('lephep');
     const [step, setStep] = useState<1 | 2 | 3>(2);
@@ -152,8 +153,10 @@ export default function BatchGradingClient({
 
     function handleSelectCriterion(key: string) {
         if (CRITERIA[key].auto) return; // Prevent selection if handled automatically somewhere else, or allow viewing
-        setActiveKey(key);
-        setStep(2);
+        startTabTransition(() => {
+            setActiveKey(key);
+            setStep(2);
+        });
     }
 
     const handleScoreChange = useCallback((studentId: string, value: number) => {
@@ -183,7 +186,7 @@ export default function BatchGradingClient({
     }
 
     function handleSave() {
-        startTransition(async () => {
+        startSaveTransition(async () => {
             const payload = {
                 weekKey,
                 category: activeCr.category,
@@ -361,10 +364,10 @@ export default function BatchGradingClient({
 
                     <button
                         onClick={handleSave}
-                        disabled={isPending}
+                        disabled={isSaving}
                         className="flex items-center gap-3 px-6 py-3 bg-[var(--gold)] text-black rounded-xl font-bold md:text-base text-sm hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(245,166,35,0.4)] transition-all active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                     >
-                        {isPending ? 'Đang lưu...' : '💾 Lưu & Tiếp theo'}
+                        {isSaving ? 'Đang lưu...' : '💾 Lưu & Tiếp theo'}
                     </button>
                 </div>
             </div>

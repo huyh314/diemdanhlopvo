@@ -42,7 +42,7 @@
     --status-excused-shadow: rgba(234, 179, 8, 0.3);
 
     /* Antigravity Glassmorphism 2.0 */
-    --glass-bg: rgba(15, 15, 18, 0.55);
+    --glass-bg: rgba(15, 15, 18, 0.4);
     --glass-border: rgba(255, 255, 255, 0.1);
     --glass-blur: 24px;
     --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -104,13 +104,13 @@
     --border-primary: rgba(255, 255, 255, 0.1);
     --border-secondary: rgba(255, 255, 255, 0.05);
 
-    --glass-bg: rgba(18, 18, 20, 0.65);
+    --glass-bg: rgba(18, 18, 20, 0.4);
     --glass-border: rgba(255, 255, 255, 0.12);
     --glass-blur: 24px;
     --glass-shadow: 0 30px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
 
-    --bg-card: rgba(24, 24, 27, 0.7);
-    --bg-card-hover: rgba(24, 24, 27, 0.9);
+    --bg-card: rgba(24, 24, 27, 0.4);
+    --bg-card-hover: rgba(24, 24, 27, 0.6);
 
     --status-present-from: rgba(16, 185, 129, 0.35);
     --status-present-to: rgba(5, 150, 105, 0.45);
@@ -137,8 +137,8 @@
     --bg-primary: #f0f4ff;
     --bg-secondary: #ffffff;
     --bg-tertiary: #e8edf5;
-    --bg-card: rgba(255, 255, 255, 0.7);
-    --bg-card-hover: rgba(255, 255, 255, 0.95);
+    --bg-card: rgba(255, 255, 255, 0.4);
+    --bg-card-hover: rgba(255, 255, 255, 0.6);
 
     --text-primary: #0f172a;
     --text-secondary: #475569;
@@ -152,7 +152,7 @@
     --border-primary: rgba(0, 0, 0, 0.1);
     --border-secondary: rgba(0, 0, 0, 0.05);
 
-    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-bg: rgba(255, 255, 255, 0.4);
     --glass-border: rgba(0, 0, 0, 0.08);
 
     --status-present-from: rgba(16, 185, 129, 0.15);
@@ -176,8 +176,8 @@
     --bg-primary: #faf5ff;
     --bg-secondary: #ffffff;
     --bg-tertiary: #f3e8ff;
-    --bg-card: rgba(255, 255, 255, 0.7);
-    --bg-card-hover: rgba(250, 245, 255, 1);
+    --bg-card: rgba(255, 255, 255, 0.4);
+    --bg-card-hover: rgba(250, 245, 255, 0.7);
 
     --text-primary: #0f172a;
     --text-secondary: #475569;
@@ -190,7 +190,7 @@
 
     --border-primary: rgba(0, 0, 0, 0.1);
     --border-secondary: rgba(0, 0, 0, 0.05);
-    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-bg: rgba(255, 255, 255, 0.4);
     --glass-border: rgba(0, 0, 0, 0.08);
 
     --pattern-opacity: 0.02;
@@ -201,8 +201,8 @@
     --bg-primary: #f0fdf4;
     --bg-secondary: #ffffff;
     --bg-tertiary: #dcfce7;
-    --bg-card: rgba(255, 255, 255, 0.7);
-    --bg-card-hover: rgba(240, 253, 244, 1);
+    --bg-card: rgba(255, 255, 255, 0.4);
+    --bg-card-hover: rgba(240, 253, 244, 0.7);
 
     --text-primary: #0f172a;
     --text-secondary: #475569;
@@ -215,7 +215,7 @@
 
     --border-primary: rgba(0, 0, 0, 0.1);
     --border-secondary: rgba(0, 0, 0, 0.05);
-    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-bg: rgba(255, 255, 255, 0.4);
     --glass-border: rgba(0, 0, 0, 0.08);
 
     --pattern-opacity: 0.02;
@@ -226,8 +226,8 @@
     --bg-primary: #fef2f2;
     --bg-secondary: #ffffff;
     --bg-tertiary: #fee2e2;
-    --bg-card: rgba(255, 255, 255, 0.7);
-    --bg-card-hover: rgba(254, 242, 242, 1);
+    --bg-card: rgba(255, 255, 255, 0.4);
+    --bg-card-hover: rgba(254, 242, 242, 0.7);
 
     --text-primary: #0f172a;
     --text-secondary: #475569;
@@ -240,7 +240,7 @@
 
     --border-primary: rgba(0, 0, 0, 0.1);
     --border-secondary: rgba(0, 0, 0, 0.05);
-    --glass-bg: rgba(255, 255, 255, 0.6);
+    --glass-bg: rgba(255, 255, 255, 0.4);
     --glass-border: rgba(0, 0, 0, 0.08);
 
     --pattern-opacity: 0.02;

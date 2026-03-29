@@ -8,6 +8,8 @@ import { saveAttendanceAction } from '@/lib/actions';
 import type { StudentRow, AttendanceStatus, GroupId } from '@/types/database.types';
 import { Button, Badge } from './ui';
 
+import { useSoundEffects } from '@/hooks/useSoundEffects';
+
 // =============================================
 // ATTENDANCE GRID — Interactive Client Component
 // =============================================
@@ -47,7 +49,9 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
     // Key unique cho mỗi nhóm + ngày để không trộn lẫn dữ liệu
     const DRAFT_KEY = `attendance_draft_${groupId}_${sessionDate}`;
 
+    const { playClick } = useSoundEffects();
     const [statuses, setStatuses] = useState<Record<string, AttendanceStatus>>(() => {
+        // ... (existing logic)
         // 1. Xây dựng defaults từ initialStudents
         const defaults: Record<string, AttendanceStatus> = {};
         initialStudents.forEach((s) => {
@@ -82,6 +86,8 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
         }
         return defaults;
     });
+
+    // ... (rest of the state and computations)
     const [search, setSearch] = useState('');
     const [isPending, startTransition] = useTransition();
     const gridRef = useRef<HTMLDivElement>(null);
@@ -146,6 +152,9 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
 
     // Toggle status
     function toggleStatus(studentId: string) {
+        // Play click sound
+        playClick();
+
         // Add a micro-animation click effect to the specific card
         gsap.fromTo(`#card-${studentId}`,
             { scale: 0.92 },

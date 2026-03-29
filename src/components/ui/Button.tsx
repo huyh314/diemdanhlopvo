@@ -1,6 +1,7 @@
 'use client';
 
 import { type ButtonHTMLAttributes, type ReactNode } from 'react';
+import { useSoundEffects } from '@/hooks/useSoundEffects';
 
 // =============================================
 // BUTTON — Shared UI Component
@@ -41,12 +42,23 @@ export default function Button({
     loading = false,
     disabled,
     className = '',
+    onClick,
     children,
     ...rest
 }: ButtonProps) {
+    const { playClick } = useSoundEffects();
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        playClick();
+        if (onClick) {
+            onClick(e);
+        }
+    };
+
     return (
         <button
             disabled={disabled || loading}
+            onClick={handleClick}
             className={`
                 relative inline-flex items-center justify-center font-semibold
                 border border-transparent cursor-pointer select-none overflow-hidden
