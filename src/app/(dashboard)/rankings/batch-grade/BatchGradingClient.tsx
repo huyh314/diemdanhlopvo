@@ -4,7 +4,7 @@ import { useState, useTransition, useEffect, useMemo, useCallback } from 'react'
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
-import { saveBatchScoresAction } from './actions';
+import { saveBatchScoresAction, fetchAutoChuyenCanBatch } from './actions';
 import { StudentRow, ScoreCategory } from '@/types/database.types';
 import { getGroupShortName } from '@/lib/constants';
 
@@ -112,6 +112,7 @@ export default function BatchGradingClient({
     const router = useRouter();
     const [isSaving, startSaveTransition] = useTransition();
     const [isSwitchingTab, startTabTransition] = useTransition();
+    const [isAutoCalculating, setIsAutoCalculating] = useState(false);
 
     const [activeKey, setActiveKey] = useState<string>('lephep');
     const [step, setStep] = useState<1 | 2 | 3>(2);
@@ -152,7 +153,6 @@ export default function BatchGradingClient({
     }, [localScores, activeKey, students]);
 
     function handleSelectCriterion(key: string) {
-        if (CRITERIA[key].auto) return; // Prevent selection if handled automatically somewhere else, or allow viewing
         startTabTransition(() => {
             setActiveKey(key);
             setStep(2);
@@ -183,6 +183,30 @@ export default function BatchGradingClient({
             });
             return newScores;
         });
+    }
+
+    async function handleAutoCalculate() {
+        setIsAutoCalculating(true);
+        try {
+            const studentIds = students.map(s => s.id);
+            const res = await fetchAutoChuyenCanBatch(weekKey, studentIds);
+            if (res.error) throw new Error(res.error);
+            if (res.data) {
+                setLocalScores(prev => {
+                    const newScores = { ...prev };
+                    newScores[activeKey] = { ...newScores[activeKey] };
+                    Object.entries(res.data || {}).forEach(([sid, score]) => {
+                        newScores[activeKey][sid] = score as number;
+                    });
+                    return newScores;
+                });
+                toast('Đã tính tự động điểm ' + activeCr.label, 'success');
+            }
+        } catch (err: any) {
+            toast(err.message || 'Lỗi tính tự động', 'error');
+        } finally {
+            setIsAutoCalculating(false);
+        }
     }
 
     function handleSave() {
@@ -304,6 +328,11 @@ export default function BatchGradingClient({
                         <p className="text-xs text-gray-400">Nhóm {activeCr.groupLabel} · Tối đa {activeCr.max} điểm</p>
                     </div>
                     <div className="flex items-center gap-2">
+                        {activeCr.auto && (
+                            <button onClick={handleAutoCalculate} disabled={isAutoCalculating} className="px-4 py-2 text-sm font-semibold rounded-xl bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-[var(--gold)] hover:bg-[var(--gold)]/20 transition flex items-center gap-2 disabled:opacity-50">
+                                {isAutoCalculating ? <span className="animate-spin text-lg block leading-none">⚙️</span> : '⚡ Tính tự động'}
+                            </button>
+                        )}
                         <button onClick={() => handleSetAll(activeCr.max)} className="px-4 py-2 text-sm font-semibold rounded-xl bg-white/5 border border-white/10 hover:border-[var(--gold)] hover:text-[var(--gold)] transition">
                             Tất cả Max
                         </button>

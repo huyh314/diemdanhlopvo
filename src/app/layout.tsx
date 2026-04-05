@@ -1,12 +1,29 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Image from 'next/image';
 import './globals.css';
 import ParticleBackground from '@/components/ui/ParticleBackground';
 import BackgroundMusic from '@/components/BackgroundMusic';
+import PwaSetup from '@/components/PwaSetup';
 
 export const metadata: Metadata = {
   title: 'Võ Đường Manager',
   description: 'Hệ thống quản lý điểm danh và xếp hạng võ sinh',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Võ Đường',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#caa052',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
@@ -34,6 +51,7 @@ export default function RootLayout({
         <BackgroundMusic />
 
         <div className="relative z-10 flex flex-col min-h-screen">
+          <PwaSetup />
           {children}
         </div>
       </body>

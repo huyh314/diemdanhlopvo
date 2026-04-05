@@ -1,6 +1,7 @@
 import { getStudents, getScoresByWeek } from '@/lib/dal';
 import BatchGradingClient from './BatchGradingClient';
 import Link from 'next/link';
+import WeekSelector from './WeekSelector';
 
 export const metadata = {
     title: 'Chấm Điểm Hàng Loạt — Võ Đường Manager',
@@ -36,7 +37,7 @@ export default async function BatchGradePage({
                 </Link>
                 <div>
                     <h2 className="text-xl font-bold text-[var(--gold)] font-orbitron">Chấm điểm phân loại hàng loạt</h2>
-                    <p className="text-xs text-gray-400">Tuần: {weekKey}</p>
+                    <WeekSelector currentWeek={weekKey} />
                 </div>
             </div>
 
