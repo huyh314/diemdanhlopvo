@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Button } from '@/components/ui';
+import { useState, useEffect } from 'react';
+import { Button, InputField } from '@/components/ui';
 import ReportPreviewModal from '@/components/ReportPreviewModal';
 
 interface ExcelPreviewData {
@@ -12,44 +12,59 @@ interface ExcelPreviewData {
 }
 
 export default function ExportButton() {
+    const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [isDownloading, setIsDownloading] = useState(false);
     const [preview, setPreview] = useState<ExcelPreviewData | null>(null);
 
-    const buildParams = () => {
+    const [selectedMonthStr, setSelectedMonthStr] = useState(() => {
         const now = new Date();
-        return { month: now.getMonth() + 1, year: now.getFullYear() };
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        return `${now.getFullYear()}-${m}`;
+    });
+
+    const getParams = () => {
+        const [yyyy, mm] = selectedMonthStr.split('-');
+        return { month: parseInt(mm, 10) || new Date().getMonth() + 1, year: parseInt(yyyy, 10) || new Date().getFullYear() };
     };
 
-    // Bước 1: Fetch JSON để hiện preview
-    const handleOpenPreview = async () => {
-        setIsLoading(true);
-        try {
-            const { month, year } = buildParams();
-            const res = await fetch(`/api/export/excel?month=${month}&year=${year}`, {
-                headers: { Accept: 'application/json' },
-            });
-            if (!res.ok) {
-                const err = await res.json();
-                alert(err.error || 'Không thể tải dữ liệu');
-                return;
-            }
-            const data: ExcelPreviewData = await res.json();
-            setPreview(data);
-        } catch (error) {
-            console.error('Preview Error:', error);
-            alert('Lỗi khi tải dữ liệu!');
-        } finally {
-            setIsLoading(false);
+    useEffect(() => {
+        if (!isOpen) {
+            setPreview(null);
+            return;
         }
-    };
 
-    // Bước 2: Tải file Excel thực sự
+        async function fetchPreview() {
+            setIsLoading(true);
+            try {
+                const { month, year } = getParams();
+                const res = await fetch(`/api/export/excel?month=${month}&year=${year}`, {
+                    headers: { Accept: 'application/json' },
+                });
+                if (!res.ok) {
+                    const err = await res.json();
+                    alert(err.error || 'Không thể tải dữ liệu');
+                    setPreview(null);
+                    return;
+                }
+                const data: ExcelPreviewData = await res.json();
+                setPreview(data);
+            } catch (error) {
+                console.error('Preview Error:', error);
+                alert('Lỗi khi tải dữ liệu!');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        fetchPreview();
+    }, [isOpen, selectedMonthStr]);
+
     const handleDownload = async () => {
         if (!preview) return;
         setIsDownloading(true);
         try {
-            const { month, year } = buildParams();
+            const { month, year } = getParams();
             const res = await fetch(`/api/export/excel?month=${month}&year=${year}`);
             if (!res.ok) throw new Error('Không thể xuất file');
 
@@ -75,24 +90,39 @@ export default function ExportButton() {
             <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleOpenPreview}
-                disabled={isLoading}
-                loading={isLoading}
+                onClick={() => setIsOpen(true)}
                 className="gap-2"
             >
                 <span>📊</span>
-                {isLoading ? 'Đang tải...' : 'Xuất Excel'}
+                Xuất Excel
             </Button>
 
-            {preview && (
+            {isOpen && (
                 <ReportPreviewModal
-                    title={`📊 Báo Cáo Điểm Danh — Tháng ${preview.month}/${preview.year}`}
-                    onClose={() => setPreview(null)}
+                    title={
+                        <div className="flex items-center gap-3">
+                            <span>📊 Báo Cáo Điểm Danh</span>
+                            <InputField 
+                                type="month"
+                                value={selectedMonthStr}
+                                onChange={(e: any) => setSelectedMonthStr(e.target.value)}
+                                className="w-auto py-1 px-2 text-sm rounded-lg border border-[var(--border-primary)] bg-[var(--bg-primary)]"
+                            />
+                        </div>
+                    }
+                    onClose={() => setIsOpen(false)}
                     onDownload={handleDownload}
                     isDownloading={isDownloading}
                     downloadLabel="⬇️ Tải về Excel"
                 >
-                    <ExcelPreviewTable data={preview} />
+                    {isLoading || !preview ? (
+                        <div className="text-center py-12 text-[var(--text-muted)]">
+                            <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                            <p>Đang tải dữ liệu báo cáo...</p>
+                        </div>
+                    ) : (
+                        <ExcelPreviewTable data={preview} />
+                    )}
                 </ReportPreviewModal>
             )}
         </>

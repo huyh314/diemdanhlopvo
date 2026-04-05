@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { Button } from './ui';
 
 interface ReportPreviewModalProps {
-    title: string;
+    title: React.ReactNode;
     onDownload: () => void;
     onClose: () => void;
     isDownloading?: boolean;
