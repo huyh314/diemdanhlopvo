@@ -9,6 +9,8 @@ export type {
     GroupId,
     AttendanceStatus,
     ScoreCategory,
+    LessonPlanSection,
+    LessonPlanContent,
     DeductionEntry,
     AttendanceStatsRow,
     StudentRankingRow,
@@ -22,6 +24,9 @@ export type {
     StudentUpdate,
     ScoreInsert,
     ScoreUpdate,
+    LessonPlanRow,
+    LessonPlanInsert,
+    LessonPlanUpdate,
 } from './database.types';
 
 // Domain types (Application layer)

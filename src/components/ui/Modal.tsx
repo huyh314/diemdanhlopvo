@@ -1,6 +1,8 @@
 'use client';
 
 import { type ReactNode, useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 
 // =============================================
 // MODAL — Shared UI Component
@@ -27,7 +29,31 @@ export default function Modal({
     maxWidth = 'max-w-md',
     className = '',
 }: ModalProps) {
+    const overlayRef = useRef<HTMLDivElement>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+
+    useGSAP(() => {
+        if (!isOpen) return;
+        
+        gsap.set(overlayRef.current, { backgroundColor: 'rgba(0,0,0,0)', backdropFilter: 'blur(0px)' });
+        gsap.set(contentRef.current, { opacity: 0, scale: 0.95, y: 20 });
+        
+        gsap.to(overlayRef.current, {
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(8px)',
+            duration: 0.4,
+            ease: 'power2.out',
+        });
+        
+        gsap.to(contentRef.current, {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.5,
+            ease: 'back.out(1.2)',
+            delay: 0.05
+        });
+    }, [isOpen]);
 
     // Close on Escape
     useEffect(() => {
@@ -43,7 +69,8 @@ export default function Modal({
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-fade-in"
+            ref={overlayRef}
+            className="fixed inset-0 z-50 flex items-center justify-center"
             onClick={onClose}
         >
             <div
@@ -52,7 +79,7 @@ export default function Modal({
                     bg-[var(--glass-bg)] border border-[var(--glass-border)]
                     rounded-3xl p-6 w-[calc(100%-2rem)] sm:w-full shadow-[var(--glass-shadow)]
                     max-h-[85vh] sm:max-h-[90vh] overflow-y-auto backdrop-blur-[var(--glass-blur)]
-                    animate-modal-in transform-gpu mx-4 sm:mx-auto
+                    transform-gpu mx-4 sm:mx-auto
                     ${maxWidth}
                     ${className}
                 `}

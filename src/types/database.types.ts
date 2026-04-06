@@ -190,6 +190,80 @@ export interface Database {
                 };
                 Relationships: any[];
             };
+
+            lesson_plans: {
+                Row: {
+                    id: string;
+                    week_key: string;
+                    session_date: string;
+                    group_id: GroupId;
+                    title: string;
+                    content: LessonPlanContent[];
+                    notes: string | null;
+                    attachments: string[];
+                    technique_ids: string[];
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    week_key: string;
+                    session_date: string;
+                    group_id: GroupId;
+                    title: string;
+                    content?: LessonPlanContent[];
+                    notes?: string | null;
+                    attachments?: string[];
+                    technique_ids?: string[];
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    week_key?: string;
+                    session_date?: string;
+                    group_id?: GroupId;
+                    title?: string;
+                    content?: LessonPlanContent[];
+                    notes?: string | null;
+                    attachments?: string[];
+                    technique_ids?: string[];
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Relationships: any[];
+            };
+
+            techniques: {
+                Row: {
+                    id: string;
+                    title: string;
+                    description: string | null;
+                    media_url: string;
+                    media_type: 'image' | 'video';
+                    created_at: string;
+                    updated_at: string;
+                };
+                Insert: {
+                    id?: string;
+                    title: string;
+                    description?: string | null;
+                    media_url: string;
+                    media_type?: 'image' | 'video';
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Update: {
+                    id?: string;
+                    title?: string;
+                    description?: string | null;
+                    media_url?: string;
+                    media_type?: 'image' | 'video';
+                    created_at?: string;
+                    updated_at?: string;
+                };
+                Relationships: [];
+            };
         };
 
         Views: {
@@ -257,6 +331,12 @@ export interface Database {
 export type GroupId = 'nhom_1' | 'nhom_2' | 'nhom_3';
 export type AttendanceStatus = 'present' | 'absent' | 'excused';
 export type ScoreCategory = 'chuyen_can' | 'y_thuc' | 'chuyen_mon';
+export type LessonPlanSection = 'khoi_dong' | 'ky_thuat' | 'the_luc' | 'tong_ket';
+
+export interface LessonPlanContent {
+    type: LessonPlanSection;
+    items: string[];
+}
 
 // =============================================
 // JSONB sub-types
@@ -319,3 +399,11 @@ export type StudentInsert = Database['public']['Tables']['students']['Insert'];
 export type StudentUpdate = Database['public']['Tables']['students']['Update'];
 export type ScoreInsert = Database['public']['Tables']['scores']['Insert'];
 export type ScoreUpdate = Database['public']['Tables']['scores']['Update'];
+
+export type LessonPlanRow = Database['public']['Tables']['lesson_plans']['Row'];
+export type LessonPlanInsert = Database['public']['Tables']['lesson_plans']['Insert'];
+export type LessonPlanUpdate = Database['public']['Tables']['lesson_plans']['Update'];
+
+export type TechniqueRow = Database['public']['Tables']['techniques']['Row'];
+export type TechniqueInsert = Database['public']['Tables']['techniques']['Insert'];
+export type TechniqueUpdate = Database['public']['Tables']['techniques']['Update'];

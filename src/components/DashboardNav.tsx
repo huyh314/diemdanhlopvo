@@ -16,6 +16,7 @@ import { useSoundEffects } from '@/hooks/useSoundEffects';
 const NAV_ITEMS = [
     { href: '/attendance', icon: '📋', label: 'Điểm Danh' },
     { href: '/rankings', icon: '🏆', label: 'Xếp Hạng' },
+    { href: '/lesson-plans', icon: '📖', label: 'Giáo Án' },
     { href: '/students', icon: '👥', label: 'Học Sinh' },
 ];
 
@@ -91,55 +92,57 @@ export default function DashboardNav() {
 
             {/* Mobile Bottom Navigation Bar */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--glass-bg)]/95 border-t border-[var(--glass-border)] backdrop-blur-2xl pb-[env(safe-area-inset-bottom)] shadow-[0_-15px_40px_rgba(0,0,0,0.6)]">
-                <div className="flex items-center justify-between px-6 min-h-[70px] relative max-w-md mx-auto">
-                    {/* Left Set */}
-                    <div className="flex items-center justify-around w-2/5">
-                        <Link
-                            href={NAV_ITEMS[0].href}
-                            onClick={playClick}
-                            className={`flex flex-col items-center justify-center gap-1.5 transition-all ${pathname.startsWith(NAV_ITEMS[0].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
-                        >
-                            <span className="text-2xl drop-shadow-md leading-none">{NAV_ITEMS[0].icon}</span>
-                            <span className="text-[10px] font-bold tracking-wider leading-none whitespace-nowrap">Điểm Danh</span>
-                        </Link>
-                        
-                        <Link
-                            href={NAV_ITEMS[1].href}
-                            onClick={playClick}
-                            className={`flex flex-col items-center justify-center gap-1.5 transition-all ${pathname.startsWith(NAV_ITEMS[1].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
-                        >
-                            <span className="text-2xl drop-shadow-md leading-none">{NAV_ITEMS[1].icon}</span>
-                            <span className="text-[10px] font-bold tracking-wider leading-none whitespace-nowrap">Xếp Hạng</span>
-                        </Link>
-                    </div>
+                <div className="flex items-center justify-around px-2 min-h-[70px] max-w-md mx-auto relative">
+                    {/* Left 2: Điểm Danh + Xếp Hạng */}
+                    <Link
+                        href={NAV_ITEMS[0].href}
+                        onClick={playClick}
+                        className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[0].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+                    >
+                        <span className="text-2xl drop-shadow-md leading-none">{NAV_ITEMS[0].icon}</span>
+                        <span className="text-[10px] font-bold tracking-wider leading-none whitespace-nowrap">Điểm Danh</span>
+                    </Link>
+
+                    <Link
+                        href={NAV_ITEMS[1].href}
+                        onClick={playClick}
+                        className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[1].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+                    >
+                        <span className="text-2xl drop-shadow-md leading-none">{NAV_ITEMS[1].icon}</span>
+                        <span className="text-[10px] font-bold tracking-wider leading-none whitespace-nowrap">Xếp Hạng</span>
+                    </Link>
 
                     {/* Center Floating Action Button (FAB) */}
-                    <div className="absolute left-1/2 -translate-x-1/2 -top-7">
-                        <button
-                            onClick={() => setShowAddModal(true)}
-                            className="w-[60px] h-[60px] rounded-full bg-gradient-to-br from-[var(--accent-from)] to-[var(--accent-to)] shadow-[0_8px_25px_rgba(var(--accent-rgb-from),0.6)] flex items-center justify-center text-white border-[5px] border-[#0a0f1c] transform-gpu transition-all duration-300 hover:scale-105 active:scale-95 group"
-                        >
-                            <span className="text-3xl font-light drop-shadow-md group-hover:rotate-90 transition-transform duration-300 leading-none pb-1">+</span>
-                        </button>
+                    <div className="relative shrink-0 mx-1">
+                        <div className="absolute left-1/2 -translate-x-1/2 -top-8">
+                            <button
+                                onClick={() => setShowAddModal(true)}
+                                className="w-[56px] h-[56px] rounded-full bg-gradient-to-br from-[var(--accent-from)] to-[var(--accent-to)] shadow-[0_8px_25px_rgba(var(--accent-rgb-from),0.6)] flex items-center justify-center text-white border-[4px] border-[#0a0f1c] transform-gpu transition-all duration-300 hover:scale-105 active:scale-95 group"
+                            >
+                                <span className="text-3xl font-light drop-shadow-md group-hover:rotate-90 transition-transform duration-300 leading-none pb-1">+</span>
+                            </button>
+                        </div>
+                        <div className="w-14 h-[70px]" />
                     </div>
 
-                    {/* Right Set */}
-                    <div className="flex items-center justify-around w-2/5">
-                        <Link
-                            href={NAV_ITEMS[2].href}
-                            onClick={playClick}
-                            className={`flex flex-col items-center justify-center gap-1.5 transition-all ${pathname.startsWith(NAV_ITEMS[2].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
-                        >
-                            <span className="text-2xl drop-shadow-md leading-none">{NAV_ITEMS[2].icon}</span>
-                            <span className="text-[10px] font-bold tracking-wider leading-none whitespace-nowrap">Học Sinh</span>
-                        </Link>
-                        
-                        {/* Fake placeholder to maintain space balancing */}
-                        <div className="flex flex-col items-center justify-center gap-1.5 opacity-0 pointer-events-none w-10">
-                            <span className="text-2xl leading-none">⚙️</span>
-                            <span className="text-[10px] leading-none">Cài Đặt</span>
-                        </div>
-                    </div>
+                    {/* Right 2: Giáo Án + Học Sinh */}
+                    <Link
+                        href={NAV_ITEMS[2].href}
+                        onClick={playClick}
+                        className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[2].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+                    >
+                        <span className="text-2xl drop-shadow-md leading-none">{NAV_ITEMS[2].icon}</span>
+                        <span className="text-[10px] font-bold tracking-wider leading-none whitespace-nowrap">Giáo Án</span>
+                    </Link>
+
+                    <Link
+                        href={NAV_ITEMS[3].href}
+                        onClick={playClick}
+                        className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[3].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
+                    >
+                        <span className="text-2xl drop-shadow-md leading-none">{NAV_ITEMS[3].icon}</span>
+                        <span className="text-[10px] font-bold tracking-wider leading-none whitespace-nowrap">Học Sinh</span>
+                    </Link>
                 </div>
             </nav>
 

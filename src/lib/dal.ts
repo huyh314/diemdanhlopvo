@@ -15,6 +15,9 @@ import type {
     StudentRankingRow,
     GroupAttendanceSummaryRow,
     ScoreCategory,
+    LessonPlanRow,
+    LessonPlanInsert,
+    LessonPlanUpdate,
 } from '@/types/database.types';
 import type { AttendanceBulkInput } from '@/types/domain';
 import { GROUP_IDS } from '@/lib/constants';
@@ -539,4 +542,135 @@ export async function setConfig(key: string, value: unknown) {
         .upsert({ key, value: value as Database['public']['Tables']['app_config']['Insert']['value'] }, { onConflict: 'key' });
 
     if (error) throw new Error(`Failed to save config: ${error.message}`);
+}
+
+// =============================================
+// LESSON PLANS
+// =============================================
+
+export async function getLessonPlans(params?: {
+    weekKey?: string;
+    groupId?: GroupId;
+    fromDate?: string;
+    toDate?: string;
+}) {
+    const supabase = await createClient();
+    let query = supabase
+        .from('lesson_plans')
+        .select('*')
+        .order('session_date', { ascending: true });
+
+    if (params?.weekKey) {
+        query = query.eq('week_key', params.weekKey);
+    }
+    if (params?.groupId) {
+        query = query.eq('group_id', params.groupId);
+    }
+    if (params?.fromDate) {
+        query = query.gte('session_date', params.fromDate);
+    }
+    if (params?.toDate) {
+        query = query.lte('session_date', params.toDate);
+    }
+
+    const { data, error } = await query;
+    if (error) throw new Error(`Failed to fetch lesson plans: ${error.message}`);
+    return data as LessonPlanRow[];
+}
+
+export async function getLessonPlan(id: string) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('lesson_plans')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error) throw new Error(`Lesson plan not found: ${error.message}`);
+    return data as LessonPlanRow;
+}
+
+export async function createLessonPlan(input: LessonPlanInsert) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('lesson_plans')
+        .insert(input)
+        .select()
+        .single();
+
+    if (error) throw new Error(`Failed to create lesson plan: ${error.message}`);
+    return data as LessonPlanRow;
+}
+
+export async function updateLessonPlan(id: string, input: LessonPlanUpdate) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('lesson_plans')
+        .update(input)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) throw new Error(`Failed to update lesson plan: ${error.message}`);
+    return data as LessonPlanRow;
+}
+
+export async function deleteLessonPlan(id: string) {
+    const supabase = await createClient();
+    const { error } = await supabase
+        .from('lesson_plans')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw new Error(`Failed to delete lesson plan: ${error.message}`);
+}
+
+// =============================================
+// TECHNIQUES LIBRARY
+// =============================================
+
+export async function getTechniques() {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('techniques')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+    if (error) throw new Error(`Failed to fetch techniques: ${error.message}`);
+    return data as import('@/types/database.types').TechniqueRow[];
+}
+
+export async function createTechnique(input: import('@/types/database.types').TechniqueInsert) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('techniques')
+        .insert(input)
+        .select()
+        .single();
+
+    if (error) throw new Error(`Failed to create technique: ${error.message}`);
+    return data as import('@/types/database.types').TechniqueRow;
+}
+
+export async function updateTechnique(id: string, input: import('@/types/database.types').TechniqueUpdate) {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('techniques')
+        .update(input)
+        .eq('id', id)
+        .select()
+        .single();
+
+    if (error) throw new Error(`Failed to update technique: ${error.message}`);
+    return data as import('@/types/database.types').TechniqueRow;
+}
+
+export async function deleteTechnique(id: string) {
+    const supabase = await createClient();
+    const { error } = await supabase
+        .from('techniques')
+        .delete()
+        .eq('id', id);
+
+    if (error) throw new Error(`Failed to delete technique: ${error.message}`);
 }

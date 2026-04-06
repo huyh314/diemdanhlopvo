@@ -6,6 +6,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useToast } from './Toast';
 import { saveAttendanceAction } from '@/lib/actions';
+import { enqueueSyncAction } from '@/lib/offline-db';
 import type { StudentRow, AttendanceStatus, GroupId } from '@/types/database.types';
 import { Button, Badge } from './ui';
 
@@ -182,6 +183,18 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
                 studentId,
                 status,
             }));
+
+            if (!navigator.onLine) {
+                await enqueueSyncAction({
+                    type: 'MARK_ATTENDANCE',
+                    endpoint: 'local',
+                    method: 'POST',
+                    payload: { sessionDate, groupId, records },
+                });
+                try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
+                toast(`Mất mạng. Đã lưu ngoại tuyến ${stats.present}/${stats.total} học sinh. Sẽ tự động đồng bộ khi có mạng.`, 'warning');
+                return;
+            }
 
             const result = await saveAttendanceAction({
                 sessionDate,
