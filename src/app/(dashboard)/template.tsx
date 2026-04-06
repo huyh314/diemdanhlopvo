@@ -10,7 +10,7 @@ export default function DashboardTemplate({ children }: { children: React.ReactN
     useGSAP(() => {
         gsap.fromTo(containerRef.current, 
             { opacity: 0, y: 15 },
-            { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out', clearProps: 'all' }
+            { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }
         );
     }, { scope: containerRef });
 
