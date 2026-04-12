@@ -147,16 +147,45 @@ function PlanCard({
             {plan.attachments && plan.attachments.length > 0 && (
                 <div className="border-t border-white/10 pt-2">
                     <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 scrollbar-none">
-                        {plan.attachments.slice(0, 5).map((url, i) => (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                                key={i}
-                                src={url}
-                                alt={`Tài liệu ${i + 1}`}
-                                className="w-10 h-10 shrink-0 rounded-lg object-cover border border-white/10 hover:scale-110 transition-transform cursor-pointer"
-                                title="Ảnh tài liệu"
-                            />
-                        ))}
+                        {plan.attachments.slice(0, 5).map((url, i) => {
+                            if (url.match(/\.(doc|docx|xls|xlsx)$/i)) {
+                                return (
+                                    <a
+                                        key={i}
+                                        href={url}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="w-10 h-10 shrink-0 rounded-lg flex flex-col items-center justify-center bg-white/10 border border-white/10 hover:scale-110 transition-transform cursor-pointer text-white text-[10px]"
+                                        title="Mở tài liệu"
+                                    >
+                                        <span className="text-xl leading-none mb-0.5">{url.match(/\.(doc|docx)$/i) ? '📄' : '📊'}</span>
+                                        <span className="text-[8px] font-bold uppercase overflow-hidden text-ellipsis whitespace-nowrap px-1 max-w-full">
+                                            {url.match(/\.(doc|docx)$/i) ? 'DOC' : 'XLS'}
+                                        </span>
+                                    </a>
+                                );
+                            }
+                            if (url.match(/\.(mp4|webm|mov)$/i)) {
+                                return (
+                                    <video
+                                        key={i}
+                                        src={url}
+                                        className="w-10 h-10 shrink-0 rounded-lg object-cover border border-white/10 hover:scale-110 transition-transform cursor-pointer"
+                                        title="Video tài liệu"
+                                    />
+                                );
+                            }
+                            return (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                    key={i}
+                                    src={url}
+                                    alt={`Tài liệu ${i + 1}`}
+                                    className="w-10 h-10 shrink-0 rounded-lg object-cover border border-white/10 hover:scale-110 transition-transform cursor-pointer"
+                                    title="Ảnh tài liệu"
+                                />
+                            );
+                        })}
                         {plan.attachments.length > 5 && (
                             <div className="w-10 h-10 shrink-0 rounded-lg bg-white/10 flex items-center justify-center text-[10px] text-[var(--text-muted)] font-bold">
                                 +{plan.attachments.length - 5}

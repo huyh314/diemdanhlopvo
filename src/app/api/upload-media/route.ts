@@ -10,7 +10,11 @@ const BUCKET = 'lesson-attachments';
 const MAX_SIZE_MB = 50; // Increased to 50MB for videos
 const ALLOWED_TYPES = [
     'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
-    'video/mp4', 'video/webm', 'video/quicktime'
+    'video/mp4', 'video/webm', 'video/quicktime',
+    'application/msword', // .doc
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+    'application/vnd.ms-excel', // .xls
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // .xlsx
 ];
 
 export async function POST(req: NextRequest) {
@@ -34,7 +38,7 @@ export async function POST(req: NextRequest) {
         // Validate type
         if (!ALLOWED_TYPES.includes(file.type)) {
             return NextResponse.json(
-                { error: 'Chỉ hỗ trợ ảnh (JPG, PNG, WebP, GIF) và Video (MP4, WebM, MOV)' },
+                { error: 'Chỉ hỗ trợ Ảnh (JPG, PNG...), Video (MP4, MOV...) và Tài liệu (Word, Excel)' },
                 { status: 400 }
             );
         }

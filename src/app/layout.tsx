@@ -1,8 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import Image from 'next/image';
 import './globals.css';
-import ParticleBackground from '@/components/ui/ParticleBackground';
-import BackgroundMusic from '@/components/BackgroundMusic';
 import PwaSetup from '@/components/PwaSetup';
 
 export const metadata: Metadata = {
@@ -36,19 +34,8 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col font-['Montserrat',sans-serif]" suppressHydrationWarning>
         {/* Martial Arts Theme Background */}
         <div className="fixed inset-0 z-[-1] pointer-events-none bg-[#0a0f1c]">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover opacity-80 mix-blend-lighten"
-            src="/background/Seamless_Looping_Hero_Cover_Animation.mp4"
-          />
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1c]/30 via-[#0a0f1c]/50 to-[#0a0f1c]/90 pointer-events-none" />
-          <ParticleBackground />
         </div>
-
-        <BackgroundMusic />
 
         <div className="relative z-10 flex flex-col min-h-screen">
           <PwaSetup />

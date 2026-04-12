@@ -100,7 +100,9 @@ function ImageUploadZone({
         e.preventDefault();
         setIsDragging(false);
         const files = Array.from(e.dataTransfer.files).filter((f) =>
-            f.type.startsWith('image/') || f.type.startsWith('video/')
+            f.type.startsWith('image/') || 
+            f.type.startsWith('video/') || 
+            f.name.match(/\.(doc|docx|xls|xlsx)$/i)
         );
         if (files.length) onAddFiles(files);
     }
@@ -123,7 +125,7 @@ function ImageUploadZone({
                     📎 Tài Liệu Đính Kèm
                 </p>
                 <span className="text-[10px] text-[var(--text-muted)]">
-                    Ảnh/Video · tối đa 50MB
+                    Ảnh/Video/Tài liệu · tối đa 50MB
                 </span>
             </div>
 
@@ -138,6 +140,13 @@ function ImageUploadZone({
                         >
                             {url.match(/\.(mp4|webm|mov)$/i) ? (
                                 <video src={url} className="w-full h-full object-cover transition group-hover:scale-105" />
+                            ) : url.match(/\.(doc|docx|xls|xlsx)$/i) ? (
+                                <div className="w-full h-full flex flex-col items-center justify-center bg-white/10 text-[var(--text-secondary)]">
+                                    <span className="text-3xl mb-1">{url.match(/\.(doc|docx)$/i) ? '📄' : '📊'}</span>
+                                    <span className="text-[10px] font-bold break-all px-2 text-center max-w-full">
+                                        {url.split('/').pop()?.split('-').slice(1).join('-') || 'Tài liệu'}
+                                    </span>
+                                </div>
                             ) : (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
@@ -166,6 +175,11 @@ function ImageUploadZone({
                         >
                             {u.file.type.startsWith('video/') ? (
                                 <video src={u.preview} className={`w-full h-full object-cover transition ${u.progress === 'uploading' ? 'opacity-40' : 'opacity-100 group-hover:scale-105'}`} />
+                            ) : u.file.name.match(/\.(doc|docx|xls|xlsx)$/i) ? (
+                                <div className={`w-full h-full flex flex-col items-center justify-center bg-white/10 text-[var(--text-secondary)] transition ${u.progress === 'uploading' ? 'opacity-40' : 'opacity-100 group-hover:scale-105'}`}>
+                                    <span className="text-3xl mb-1">{u.file.name.match(/\.(doc|docx)$/i) ? '📄' : '📊'}</span>
+                                    <span className="text-[10px] font-bold break-all px-2 text-center max-w-full truncate">{u.file.name}</span>
+                                </div>
                             ) : (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
@@ -251,7 +265,7 @@ function ImageUploadZone({
                     <input
                         ref={fileInputRef}
                         type="file"
-                        accept="image/*,video/*"
+                        accept="image/*,video/*,.doc,.docx,.xls,.xlsx"
                         multiple
                         className="hidden"
                         onChange={handleFileChange}
@@ -530,7 +544,13 @@ export default function LessonPlanModal({
                             onAddFiles={handleAddFiles}
                             onRemoveUploading={handleRemoveUploading}
                             onRemoveSaved={handleRemoveSaved}
-                            onPreview={(url) => setLightboxUrl(url)}
+                            onPreview={(url) => {
+                                if (url.match(/\.(doc|docx|xls|xlsx)$/i)) {
+                                    window.open(url, '_blank');
+                                } else {
+                                    setLightboxUrl(url);
+                                }
+                            }}
                         />
 
                         {/* Divider */}
