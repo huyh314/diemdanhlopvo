@@ -7,21 +7,25 @@ VALUES ('avatars', 'avatars', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- 2. Cho phép ai cũng có thể XEM ảnh (Public Read)
+DROP POLICY IF EXISTS "Avatar Public Read Access" ON storage.objects;
 CREATE POLICY "Avatar Public Read Access" 
 ON storage.objects FOR SELECT 
 USING ( bucket_id = 'avatars' );
 
 -- 3. Chỉ cho phép người có tài khoản (đã đăng nhập) được ĐĂNG ảnh
+DROP POLICY IF EXISTS "Avatar Auth Upload Access" ON storage.objects;
 CREATE POLICY "Avatar Auth Upload Access" 
 ON storage.objects FOR INSERT 
 WITH CHECK ( bucket_id = 'avatars' AND auth.role() = 'authenticated' );
 
 -- 4. Định nghĩa quyền CẬP NHẬT ảnh
+DROP POLICY IF EXISTS "Avatar Auth Update Access" ON storage.objects;
 CREATE POLICY "Avatar Auth Update Access" 
 ON storage.objects FOR UPDATE 
 USING ( bucket_id = 'avatars' AND auth.role() = 'authenticated' );
 
 -- 5. Định nghĩa quyền XÓA ảnh
+DROP POLICY IF EXISTS "Avatar Auth Delete Access" ON storage.objects;
 CREATE POLICY "Avatar Auth Delete Access" 
 ON storage.objects FOR DELETE 
 USING ( bucket_id = 'avatars' AND auth.role() = 'authenticated' );

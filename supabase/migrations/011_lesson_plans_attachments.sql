@@ -17,15 +17,18 @@ VALUES ('lesson-attachments', 'lesson-attachments', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- RLS Policy cho storage bucket
+DROP POLICY IF EXISTS "Authenticated users can upload lesson attachments" ON storage.objects;
 CREATE POLICY "Authenticated users can upload lesson attachments"
 ON storage.objects FOR INSERT
 TO authenticated
 WITH CHECK (bucket_id = 'lesson-attachments');
 
+DROP POLICY IF EXISTS "Anyone can view lesson attachments" ON storage.objects;
 CREATE POLICY "Anyone can view lesson attachments"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'lesson-attachments');
 
+DROP POLICY IF EXISTS "Authenticated users can delete lesson attachments" ON storage.objects;
 CREATE POLICY "Authenticated users can delete lesson attachments"
 ON storage.objects FOR DELETE
 TO authenticated
