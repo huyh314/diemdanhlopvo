@@ -3,7 +3,10 @@
 export default function DownloadStudentListButton() {
     async function download() {
         try {
-            const res = await fetch('/api/export/student-list');
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const year = now.getFullYear();
+            const res = await fetch(`/api/export/student-list?month=${month}&year=${year}`);
             if (!res.ok) {
                 const err = await res.json();
                 alert(err.error || 'Không thể tải danh sách');
@@ -13,7 +16,7 @@ export default function DownloadStudentListButton() {
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `DanhSachHocSinh_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            a.download = `BangDiemDanh_T${month}_${year}.xlsx`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
