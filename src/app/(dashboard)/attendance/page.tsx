@@ -9,6 +9,7 @@ import { GROUP_IDS, getGroupName } from '@/lib/constants';
 import AttendanceContent from './_components/AttendanceContent';
 import { GroupSummarySkeleton, AttendanceGridSkeleton } from './_components/Skeletons';
 import ExportButton from './_components/ExportButton';
+import DownloadStudentListButton from './_components/DownloadStudentListButton';
 import DateSelector from './_components/DateSelector';
 
 export const metadata = {
@@ -54,6 +55,7 @@ export default async function AttendancePage({
                 </div>
                 <div className="flex items-center gap-3">
                     <DateSelector defaultDate={today} />
+                    <DownloadStudentListButton />
                     <ExportButton />
                 </div>
             </div>
