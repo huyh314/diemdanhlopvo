@@ -1,0 +1,928 @@
+<!-- Synchronized with cham-diem-bong-da.html with adjusted avatar path -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Điểm Danh Lớp Bóng Đá — Quản Lý & Xuất Excel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #050d08;
+            color: #ffffff;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .fifa-card {
+            aspect-ratio: 9 / 16;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .fifa-active {
+            border-color: #facc15 !important;
+            box-shadow: 0 0 25px rgba(250, 204, 21, 0.8), 0 0 8px rgba(255, 255, 255, 0.6);
+            transform: scale(1.02);
+            filter: brightness(1.08) contrast(1.05);
+        }
+        .fifa-idle {
+            border-color: #3f3f46;
+            filter: brightness(0.95) contrast(0.98);
+            opacity: 0.9;
+        }
+        .fifa-idle:hover {
+            opacity: 1;
+            border-color: #71717a;
+        }
+        .nameplate {
+            transform: skewX(-2deg);
+            font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+            letter-spacing: 0.03em;
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-24 select-none">
+    <input type="file" id="directAvatarInput" accept="image/*" class="hidden">
+
+    <!-- Ambient Pitch Glow -->
+    <div class="fixed inset-0 pointer-events-none opacity-35 bg-[radial-gradient(circle_at_50%_0%,rgba(234,179,8,0.2),rgba(34,197,94,0.12),transparent_70%)]"></div>
+
+    <!-- HEADER -->
+    <header class="sticky top-0 z-40 backdrop-blur-2xl bg-[#07130c]/95 border-b border-amber-500/20 px-4 py-2.5 shadow-xl">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-300 to-yellow-600 flex items-center justify-center text-lg shadow-md border border-amber-200 text-black font-black">
+                    ⚽
+                </div>
+                <div>
+                    <h1 class="text-xs sm:text-sm font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-500 uppercase">
+                        ĐIỂM DANH LỚP BÓNG ĐÁ
+                    </h1>
+                    <p class="text-[9px] text-zinc-400" id="classSettingBadge">Gói: 8 buổi/tháng • 600.000đ</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+                <button onclick="openSettingsModal()" class="px-2.5 py-1.5 bg-zinc-800 hover:bg-zinc-700 border border-amber-500/40 text-amber-300 rounded-xl text-xs font-bold flex items-center gap-1 active:scale-95 transition" title="Cài đặt học phí & số buổi">
+                    <span>⚙️</span>
+                    <span class="hidden sm:inline">Học Phí</span>
+                </button>
+                <input type="date" id="datePicker" class="bg-zinc-900 text-amber-300 border border-amber-500/40 rounded-xl px-2 py-1 text-xs font-black focus:outline-none">
+            </div>
+        </div>
+    </header>
+
+    <!-- STATS BAR -->
+    <div class="max-w-5xl mx-auto px-4 pt-2.5">
+        <div class="grid grid-cols-3 gap-2">
+            <div class="bg-amber-950/30 border border-amber-500/30 rounded-2xl p-2 text-center">
+                <span class="text-[9px] uppercase font-bold text-amber-400">Có mặt hôm nay</span>
+                <div id="statPresent" class="text-lg sm:text-xl font-black text-amber-400">0 em</div>
+            </div>
+            <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-2 text-center">
+                <span class="text-[9px] uppercase font-bold text-zinc-400">Chưa điểm danh</span>
+                <div id="statAbsent" class="text-lg sm:text-xl font-black text-zinc-400">0 em</div>
+            </div>
+            <div class="bg-emerald-950/30 border border-emerald-500/30 rounded-2xl p-2 text-center">
+                <span class="text-[9px] uppercase font-bold text-emerald-400">Tỉ lệ tham gia</span>
+                <div id="statRate" class="text-lg sm:text-xl font-black text-emerald-400">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <div class="max-w-5xl mx-auto px-4 mt-2.5">
+        <div class="flex p-1 bg-black/60 border border-white/10 rounded-2xl gap-1 text-xs font-black">
+            <button onclick="switchTab('tabCards')" id="btnTabCards" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-black shadow-md transition">
+                🃏 Thẻ Điểm Danh
+            </button>
+            <button onclick="switchTab('tabHistory')" id="btnTabHistory" class="flex-1 py-2 rounded-xl text-zinc-400 hover:text-white transition">
+                📊 Thống Kê & Excel
+            </button>
+            <button onclick="switchTab('tabRoster')" id="btnTabRoster" class="flex-1 py-2 rounded-xl text-zinc-400 hover:text-white transition">
+                👥 Học Viên & Thu Phí
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-5xl mx-auto px-4 mt-3">
+        <!-- TAB 1: THẺ CẦU THỦ VỚI TÙY CHỈNH KÍCH THƯỚC (3, 4, 5 CỘT) -->
+        <section id="tabCards" class="space-y-3">
+        <section id="tabCards" class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <!-- Nút chọn số thẻ / hàng -->
+                <div class="flex items-center gap-1 bg-black/60 p-1 rounded-xl border border-zinc-700">
+                    <span class="text-[10px] text-zinc-400 px-1 font-bold">Thu phóng:</span>
+                    <button onclick="setGridCols(3)" id="btnCol3" class="px-2 py-1 rounded-lg text-xs font-black bg-amber-400 text-black transition">3 thẻ</button>
+                    <button onclick="setGridCols(4)" id="btnCol4" class="px-2 py-1 rounded-lg text-xs font-black text-zinc-400 hover:text-white transition">4 thẻ</button>
+                    <button onclick="setGridCols(5)" id="btnCol5" class="px-2 py-1 rounded-lg text-xs font-black text-zinc-400 hover:text-white transition">5 thẻ</button>
+                </div>
+
+                <!-- Phím tắt thao tác nhanh -->
+                <div class="flex items-center gap-1.5 ml-auto">
+                    <button onclick="markAllPresent()" class="px-3 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-black font-black rounded-xl text-xs active:scale-95 shadow">
+                        ⚡ Tất Cả Có Mặt
+                    </button>
+                    <button onclick="resetAttendance()" class="px-2.5 py-1.5 bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold active:scale-95">
+                        🔄 Đặt Lại
+                    </button>
+                </div>
+            </div>
+
+            <!-- CARDS GRID -->
+            <div id="cardsGrid" class="grid grid-cols-3 gap-2.5 sm:gap-3.5"></div>
+        </section>
+
+        <!-- TAB 2: THỐNG KÊ & XUẤT EXCEL -->
+        <section id="tabHistory" class="space-y-3 hidden">
+            <div class="bg-black/60 border border-white/10 rounded-2xl p-3.5 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-xs sm:text-sm font-black text-white flex items-center gap-1.5">
+                            <span>📊</span>
+                            <span>Bảng Thống Kê Số Buổi & Chuyên Cần</span>
+                        </h2>
+                        <p class="text-[10px] text-zinc-400">Xem theo tuần, theo tháng hoặc khoảng ngày bất kỳ</p>
+                    </div>
+
+                    <button onclick="exportToExcelCSV()" class="px-3.5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-black text-xs rounded-xl shadow-lg hover:brightness-110 active:scale-95 transition flex items-center gap-1.5">
+                        <span class="text-sm">📥</span>
+                        <span>Xuất File Excel</span>
+                    </button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-zinc-800">
+                    <button onclick="setTimeRange('thisWeek')" id="btnRangeWeek" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-black transition">
+                        Tuần Này
+                    </button>
+                    <button onclick="setTimeRange('thisMonth')" id="btnRangeMonth" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-300 hover:text-white transition">
+                        Tháng Này
+                    </button>
+                    <button onclick="setTimeRange('allTime')" id="btnRangeAll" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-300 hover:text-white transition">
+                        Tất Cả
+                    </button>
+
+                    <div class="flex items-center gap-1 text-[11px] text-zinc-300 ml-auto">
+                        <span>Từ:</span>
+                        <input type="date" id="rangeStart" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-amber-300" onchange="applyCustomRange()">
+                        <span>Đến:</span>
+                        <input type="date" id="rangeEnd" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-amber-300" onchange="applyCustomRange()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto border border-zinc-800 rounded-2xl bg-black/40 shadow-xl">
+                <table class="w-full text-left text-xs">
+                    <thead id="historyTableHead"></thead>
+                    <tbody id="historyTableBody" class="divide-y divide-zinc-800/60"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 3: ROSTER & QUẢN LÝ HỌC PHÍ -->
+        <section id="tabRoster" class="space-y-3 hidden">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-xs sm:text-sm font-black text-white">Danh Sách Học Viên (<span id="totalCount">0</span> em)</h2>
+                    <p class="text-[10px] text-zinc-400">Theo dõi số buổi còn lại và tình trạng đóng học phí</p>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button onclick="renewAllForNewMonth()" class="px-2.5 py-1.5 bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 rounded-xl text-xs font-bold active:scale-95">
+                        🔄 Nạp Tháng Mới Cả Lớp
+                    </button>
+                    <button onclick="openAddModal()" class="px-3 py-1.5 bg-amber-400 text-black font-black rounded-xl text-xs active:scale-95">
+                        ➕ Thêm Em
+                    </button>
+                </div>
+            </div>
+            <div id="rosterList" class="space-y-2"></div>
+        </section>
+    </main>
+
+    <!-- MODAL SETTINGS -->
+    <div id="modalSettings" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-[#0c1a10] border border-amber-500/30 rounded-3xl max-w-sm w-full p-5 space-y-3.5 text-xs">
+            <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+                <h3 class="font-black text-sm text-amber-300 flex items-center gap-1.5">
+                    <span>⚙️</span>
+                    <span>Cài Đặt Số Buổi & Học Phí Tháng</span>
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-zinc-400 text-sm">✕</button>
+            </div>
+
+            <div>
+                <label class="block text-zinc-300 font-bold mb-1">Số buổi trong 1 tháng (Người thầy quy định)</label>
+                <input id="settingMonthlySessions" type="number" value="8" class="w-full bg-black/50 border border-zinc-700 rounded-xl p-2.5 text-white font-black text-sm text-center">
+                <p class="text-[10px] text-zinc-400 mt-1">Ví dụ: 8 buổi hoặc 12 buổi / tháng</p>
+            </div>
+
+            <div>
+                <label class="block text-zinc-300 font-bold mb-1">Số tiền học phí / tháng (VNĐ)</label>
+                <input id="settingMonthlyFee" type="number" step="50000" value="600000" class="w-full bg-black/50 border border-zinc-700 rounded-xl p-2.5 text-amber-300 font-black text-sm text-center">
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeSettingsModal()" class="px-3.5 py-2 bg-zinc-800 text-zinc-300 rounded-xl font-bold">Hủy</button>
+                <button onclick="saveSettings()" class="px-5 py-2 bg-amber-400 text-black font-black rounded-xl shadow-lg">Lưu Cài Đặt</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ADD -->
+    <div id="modalAdd" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bg-[#0c1a10] border border-amber-500/30 rounded-3xl max-w-sm w-full p-5 space-y-3 text-xs">
+            <h3 class="font-black text-sm text-amber-300" id="modalTitle">Thêm Học Viên Mới</h3>
+            
+            <div>
+                <label class="block text-zinc-300 font-bold mb-1">Ảnh thật của học viên</label>
+                <div class="flex items-center gap-3 bg-black/40 p-2.5 rounded-2xl border border-zinc-700">
+                    <div class="w-14 h-14 rounded-xl overflow-hidden bg-zinc-800 border-2 border-amber-400 shrink-0">
+                        <img id="modalAvatarPreview" src="/football-avatar.jpg" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <label for="avatarFileInput" class="inline-block px-3 py-1.5 bg-amber-400 text-black font-black rounded-xl cursor-pointer active:scale-95 text-[11px]">
+                            📷 Chụp / Chọn ảnh
+                        </label>
+                        <input id="avatarFileInput" type="file" accept="image/*" class="hidden">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-zinc-400 mb-1">Tên học viên in trên thẻ *</label>
+                <input id="playerNameInput" type="text" placeholder="NGUYỄN VĂN AN" class="w-full bg-black/50 border border-zinc-700 rounded-xl p-2 text-white uppercase font-black">
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="block text-zinc-400 mb-1">Số áo</label>
+                    <input id="playerJerseyInput" type="number" value="10" class="w-full bg-black/50 border border-zinc-700 rounded-xl p-2 text-white font-bold text-center">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 mb-1">OVR</label>
+                    <input id="playerRatingInput" type="number" value="90" class="w-full bg-black/50 border border-zinc-700 rounded-xl p-2 text-amber-400 font-black text-center">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 mb-1">Vị trí</label>
+                    <select id="playerPosInput" class="w-full bg-black/50 border border-zinc-700 rounded-xl p-2 text-white font-bold">
+                        <option value="GK">GK</option>
+                        <option value="DF">DF</option>
+                        <option value="MF">MF</option>
+                        <option value="FW" selected>FW</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-zinc-400 mb-1">Số buổi đăng ký</label>
+                    <input id="playerSessionsInput" type="number" value="8" class="w-full bg-black/50 border border-zinc-700 rounded-xl p-2 text-white font-bold">
+                </div>
+                <div>
+                    <label class="block text-zinc-400 mb-1">Học phí tháng này</label>
+                    <select id="playerTuitionInput" class="w-full bg-black/50 border border-zinc-700 rounded-xl p-2 text-white font-bold">
+                        <option value="PAID">✅ Đã đóng</option>
+                        <option value="UNPAID">⏳ Chưa đóng</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAddModal()" class="px-3 py-1.5 bg-zinc-800 text-zinc-300 rounded-xl">Hủy</button>
+                <button onclick="savePlayer()" class="px-4 py-1.5 bg-amber-400 text-black font-black rounded-xl">Lưu Thẻ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-amber-400 text-black font-black px-4 py-2 rounded-xl text-xs shadow-xl hidden"></div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playKick() {
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.frequency.setValueAtTime(160, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.12);
+                gain.gain.setValueAtTime(0.25, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(now); osc.stop(now + 0.12);
+            } catch(e){}
+        }
+
+        function getVietnamToday() {
+            return new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+        }
+
+        const POS_CONFIG = {
+            GK: { bg: 'bg-amber-600', ovr: 88 },
+            DF: { bg: 'bg-blue-600', ovr: 86 },
+            MF: { bg: 'bg-emerald-600', ovr: 90 },
+            FW: { bg: 'bg-rose-600', ovr: 92 }
+        };
+
+        const DEFAULT_SETTINGS = { monthlySessions: 8, monthlyFee: 600000 };
+        let classSettings = JSON.parse(localStorage.getItem('fifa_class_settings') || JSON.stringify(DEFAULT_SETTINGS));
+
+        const INITIAL_PLAYERS = [
+            { id: 'p1', name: 'Nguyễn Văn Minh', jerseyNumber: 1, position: 'GK', rating: 88, preferredFoot: 'Phải', remaining: 8, tuition: 'PAID', avatar: '/football-avatar.jpg' },
+            { id: 'p2', name: 'Trần Tuấn Kiệt', jerseyNumber: 12, position: 'GK', rating: 86, preferredFoot: 'Phải', remaining: 2, tuition: 'PAID', avatar: '/football-avatar.jpg' },
+            { id: 'p3', name: 'Lê Hoàng Long', jerseyNumber: 4, position: 'DF', rating: 89, preferredFoot: 'Phải', remaining: 8, tuition: 'PAID', avatar: '/football-avatar.jpg' },
+            { id: 'p4', name: 'Vũ Quốc Anh', jerseyNumber: 5, position: 'DF', rating: 85, preferredFoot: 'Phải', remaining: 1, tuition: 'UNPAID', avatar: '/football-avatar.jpg' },
+            { id: 'p5', name: 'Đỗ Hải Nam', jerseyNumber: 3, position: 'DF', rating: 87, preferredFoot: 'Trái', remaining: 6, tuition: 'PAID', avatar: '/football-avatar.jpg' },
+            { id: 'p6', name: 'Phạm Gia Bảo', jerseyNumber: 2, position: 'DF', rating: 86, preferredFoot: 'Phải', remaining: 7, tuition: 'PAID', avatar: '/football-avatar.jpg' },
+            { id: 'p7', name: 'Nguyễn Quang Hải', jerseyNumber: 19, position: 'MF', rating: 93, preferredFoot: 'Trái', remaining: 8, tuition: 'PAID', avatar: '/football-avatar.jpg' },
+            { id: 'p8', name: 'Đặng Tuấn Anh', jerseyNumber: 8, position: 'MF', rating: 91, preferredFoot: 'Hai chân', remaining: 5, tuition: 'UNPAID', avatar: '/football-avatar.jpg' },
+            { id: 'p9', name: 'Hoàng Minh Đức', jerseyNumber: 6, position: 'MF', rating: 88, preferredFoot: 'Phải', remaining: 4, tuition: 'PAID', avatar: '/football-avatar.jpg' },
+            { id: 'p10', name: 'Lý Tiến Đạt', jerseyNumber: 7, position: 'FW', rating: 92, preferredFoot: 'Phải', remaining: 8, tuition: 'PAID', avatar: '/football-avatar.jpg' },
+            { id: 'p11', name: 'Lê Văn Tùng', jerseyNumber: 10, position: 'FW', rating: 95, preferredFoot: 'Trái', remaining: 7, tuition: 'PAID', avatar: '/football-avatar.jpg' },
+            { id: 'p12', name: 'Dương Hùng Dũng', jerseyNumber: 9, position: 'FW', rating: 90, preferredFoot: 'Phải', remaining: 8, tuition: 'PAID', avatar: '/football-avatar.jpg' }
+        ];
+
+        let players = JSON.parse(localStorage.getItem('fifa_standalone_players_v4') || JSON.stringify(INITIAL_PLAYERS));
+        let selectedDate = getVietnamToday();
+        let attendanceMap = JSON.parse(localStorage.getItem('fifa_standalone_attendance_v4') || '{}');
+        if (!attendanceMap[selectedDate]) attendanceMap[selectedDate] = [];
+
+        let currentGridCols = parseInt(localStorage.getItem('fifa_grid_cols') || '3', 10);
+        let currentRangeFilter = 'thisMonth';
+
+        document.getElementById('datePicker').value = selectedDate;
+        document.getElementById('datePicker').addEventListener('change', (e) => {
+            selectedDate = e.target.value;
+            if (!attendanceMap[selectedDate]) attendanceMap[selectedDate] = [];
+            renderAll();
+        });
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('hidden');
+            setTimeout(() => t.classList.add('hidden'), 2200);
+        }
+
+        function setGridCols(cols) {
+            currentGridCols = cols;
+            localStorage.setItem('fifa_grid_cols', cols);
+            [3, 4, 5].forEach(c => {
+                const btn = document.getElementById('btnCol' + c);
+                if (c === cols) {
+                    btn.className = 'px-2 py-1 rounded-lg text-xs font-black bg-amber-400 text-black transition';
+                } else {
+                    btn.className = 'px-2 py-1 rounded-lg text-xs font-black text-zinc-400 hover:text-white transition';
+                }
+            });
+
+            const grid = document.getElementById('cardsGrid');
+            grid.className = `grid grid-cols-${cols} gap-2 sm:gap-3`;
+            renderCards();
+        }
+
+        function compressAndResizeImage(file, callback) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const targetWidth = 450;
+                    const targetHeight = 800;
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
+                    const ctx = canvas.getContext('2d');
+                    const scale = Math.max(targetWidth / img.width, targetHeight / img.height);
+                    const x = (targetWidth - img.width * scale) / 2;
+                    const y = (targetHeight - img.height * scale) / 2;
+                    ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                    callback(canvas.toDataURL('image/jpeg', 0.82));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        let targetPlayerIdForPhoto = null;
+        function triggerPhotoUploadForPlayer(playerId, event) {
+            if (event) event.stopPropagation();
+            targetPlayerIdForPhoto = playerId;
+            const input = document.getElementById('directAvatarInput');
+            input.value = '';
+            input.click();
+        }
+
+        document.getElementById('directAvatarInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && targetPlayerIdForPhoto) {
+                showToast('⏳ Đang gắn ảnh học viên...');
+                compressAndResizeImage(file, (compressed) => {
+                    const p = players.find(i => i.id === targetPlayerIdForPhoto);
+                    if (p) {
+                        p.avatar = compressed;
+                        localStorage.setItem('fifa_standalone_players_v4', JSON.stringify(players));
+                        renderAll();
+                        showToast('✅ Đã đổi ảnh học viên ' + p.name);
+                    }
+                    targetPlayerIdForPhoto = null;
+                });
+            }
+        });
+
+        function switchTab(tabId) {
+            ['tabCards', 'tabHistory', 'tabRoster'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+
+            ['btnTabCards', 'btnTabHistory', 'btnTabRoster'].forEach(btn => {
+                document.getElementById(btn).className = 'flex-1 py-2 rounded-xl text-zinc-400 hover:text-white transition';
+            });
+            const activeBtnMap = {
+                tabCards: 'btnTabCards',
+                tabHistory: 'btnTabHistory',
+                tabRoster: 'btnTabRoster'
+            };
+            document.getElementById(activeBtnMap[tabId]).className = 'flex-1 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-black shadow-md transition font-black';
+
+            if (tabId === 'tabHistory') renderHistoryTable();
+        }
+
+        function toggleAttendance(id) {
+            playKick();
+            const list = attendanceMap[selectedDate] || [];
+            const idx = list.indexOf(id);
+            if (idx !== -1) {
+                list.splice(idx, 1);
+            } else {
+                list.push(id);
+            }
+            attendanceMap[selectedDate] = list;
+            localStorage.setItem('fifa_standalone_attendance_v4', JSON.stringify(attendanceMap));
+            renderAll();
+        }
+
+        function markAllPresent() {
+            attendanceMap[selectedDate] = players.map(p => p.id);
+            localStorage.setItem('fifa_standalone_attendance_v4', JSON.stringify(attendanceMap));
+            renderAll();
+            showToast('⚡ Đã bật sáng toàn bộ thẻ ngày ' + selectedDate);
+        }
+
+        function resetAttendance() {
+            attendanceMap[selectedDate] = [];
+            localStorage.setItem('fifa_standalone_attendance_v4', JSON.stringify(attendanceMap));
+            renderAll();
+            showToast('🔄 Đã đặt lại ngày này');
+        }
+
+        // ============================================================
+        // RENDER THẺ CẦU THỦ (GIAO DIỆN TỰ NHIÊN, SÁNG RÕ, KHÔNG KHUNG RỜM RÀ)
+        // ============================================================
+        function renderCards() {
+            const currentList = attendanceMap[selectedDate] || [];
+            const grid = document.getElementById('cardsGrid');
+            const isCompact = currentGridCols >= 4;
+
+            grid.innerHTML = players.map(p => {
+                const isPresent = currentList.includes(p.id);
+                const pos = POS_CONFIG[p.position] || POS_CONFIG.FW;
+                const avatarSrc = p.avatar || '/football-avatar.jpg';
+
+                return `
+                    <div onclick="toggleAttendance('${p.id}')"
+                         class="fifa-card relative rounded-2xl sm:rounded-3xl cursor-pointer overflow-hidden p-1.5 sm:p-2.5 border-2 flex flex-col justify-between ${isPresent ? 'border-amber-400 shadow-[0_0_25px_rgba(250,204,21,0.5)]' : 'border-zinc-800'}">
+                        
+                        <!-- Ảnh Nền Cầu Thủ Toàn Diện Thẻ (Tự nhiên, không khung viền) -->
+                        <div class="absolute inset-0 z-0 bg-zinc-900">
+                            <img src="${avatarSrc}" onerror="this.src='/football-avatar.jpg'" class="w-full h-full object-cover object-top" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-black/50"></div>
+                            ${isPresent ? '<div class="absolute inset-0 bg-gradient-to-tr from-amber-500/25 via-transparent to-yellow-300/30 mix-blend-screen pointer-events-none"></div>' : ''}
+                        </div>
+
+                        <!-- Thanh Trên: OVR, Số Áo, Nút Sửa ✏️ & Đổi Ảnh 📷 -->
+                        <div class="relative z-10 flex items-start justify-between">
+                            <div class="flex flex-col items-center bg-black/60 backdrop-blur-md rounded-lg px-1.5 py-0.5 border border-amber-500/30">
+                                <span class="${isCompact ? 'text-xs' : 'text-sm sm:text-base'} font-black text-amber-300 leading-none">${p.rating || 90}</span>
+                                <span class="text-[7px] sm:text-[8px] font-extrabold px-0.5 rounded text-white ${pos.bg}">${p.position}</span>
+                            </div>
+
+                            <div class="flex flex-col items-end gap-1">
+                                <div class="${isCompact ? 'w-6 h-6 text-[10px]' : 'w-7 h-7 sm:w-8 sm:h-8 text-xs'} rounded-lg bg-gradient-to-br from-amber-400 to-yellow-600 text-black font-black flex items-center justify-center shadow">
+                                    #${p.jerseyNumber}
+                                </div>
+                                <div class="flex items-center gap-1">
+                                    <button onclick="openEditModal('${p.id}', event)"
+                                            class="${isCompact ? 'w-5 h-5 text-[9px]' : 'w-6 h-6 text-[10px]'} rounded-md bg-black/70 border border-amber-400/60 text-amber-300 flex items-center justify-center hover:bg-amber-400 hover:text-black transition shadow"
+                                            title="Sửa thông tin học viên">
+                                        ✏️
+                                    </button>
+                                    <button onclick="triggerPhotoUploadForPlayer('${p.id}', event)"
+                                            class="${isCompact ? 'w-5 h-5 text-[9px]' : 'w-6 h-6 text-[10px]'} rounded-md bg-black/70 border border-amber-400/60 text-amber-300 flex items-center justify-center hover:bg-amber-400 hover:text-black transition shadow"
+                                            title="Đổi ảnh">
+                                        📷
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thanh Dưới: Bảng Tên & Trạng Thái Điểm Danh -->
+                        <div class="relative z-10 space-y-1">
+                            <div class="bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-300 text-black py-0.5 px-1 rounded text-center shadow nameplate font-black">
+                                <div class="${isCompact ? 'text-[9px]' : 'text-[11px] sm:text-xs'} uppercase truncate leading-tight">${p.name}</div>
+                            </div>
+
+                            <div class="bg-black/80 backdrop-blur-md border border-white/10 rounded-lg px-1.5 py-0.5 flex items-center justify-between text-[8px] sm:text-[9px] text-zinc-300">
+                                <span class="truncate">Còn <strong>${p.remaining}b</strong></span>
+                                ${isPresent 
+                                    ? '<span class="text-amber-400 font-black">✓ Có mặt</span>' 
+                                    : '<span class="text-zinc-400">Chưa điểm</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function setTimeRange(rangeType) {
+            currentRangeFilter = rangeType;
+            ['btnRangeWeek', 'btnRangeMonth', 'btnRangeAll'].forEach(id => {
+                document.getElementById(id).className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-300 hover:text-white transition';
+            });
+            if (rangeType === 'thisWeek') document.getElementById('btnRangeWeek').className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-black transition';
+            if (rangeType === 'thisMonth') document.getElementById('btnRangeMonth').className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-black transition';
+            if (rangeType === 'allTime') document.getElementById('btnRangeAll').className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-black transition';
+
+            renderHistoryTable();
+        }
+
+        function applyCustomRange() {
+            currentRangeFilter = 'custom';
+            ['btnRangeWeek', 'btnRangeMonth', 'btnRangeAll'].forEach(id => {
+                document.getElementById(id).className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-300 hover:text-white transition';
+            });
+            renderHistoryTable();
+        }
+
+        function getFilteredDates() {
+            const allDates = Object.keys(attendanceMap).sort((a, b) => a.localeCompare(b));
+            if (!allDates.includes(selectedDate)) allDates.push(selectedDate);
+            allDates.sort((a, b) => a.localeCompare(b));
+
+            const today = new Date(getVietnamToday());
+
+            if (currentRangeFilter === 'thisWeek') {
+                const day = today.getDay();
+                const diffToMonday = today.getDate() - day + (day === 0 ? -6 : 1);
+                const monday = new Date(today.setDate(diffToMonday));
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+
+                const monStr = monday.toISOString().split('T')[0];
+                const sunStr = sunday.toISOString().split('T')[0];
+                return allDates.filter(d => d >= monStr && d <= sunStr);
+            }
+
+            if (currentRangeFilter === 'thisMonth') {
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const prefix = `${year}-${month}`;
+                return allDates.filter(d => d.startsWith(prefix));
+            }
+
+            if (currentRangeFilter === 'custom') {
+                const start = document.getElementById('rangeStart').value;
+                const end = document.getElementById('rangeEnd').value;
+                if (!start && !end) return allDates;
+                return allDates.filter(d => (!start || d >= start) && (!end || d <= end));
+            }
+
+            return allDates;
+        }
+
+        function renderHistoryTable() {
+            const dates = getFilteredDates();
+
+            document.getElementById('historyTableHead').innerHTML = `
+                <tr class="border-b border-zinc-800 bg-zinc-950 text-zinc-400 uppercase text-[10px]">
+                    <th class="p-3 sticky left-0 bg-zinc-950 z-20 min-w-[130px]">Học viên</th>
+                    <th class="p-2 text-center min-w-[45px]">Vị trí</th>
+                    ${dates.map(d => `
+                        <th class="p-2 text-center min-w-[55px] ${d === selectedDate ? 'text-amber-400 font-black' : ''}">
+                            ${d.slice(5)}
+                            <span class="block text-[8px] opacity-75">${d === getVietnamToday() ? 'Hôm nay' : ''}</span>
+                        </th>
+                    `).join('')}
+                    <th class="p-3 text-center text-amber-400 min-w-[80px]">Tổng Điểm Danh</th>
+                    <th class="p-3 text-center text-emerald-400 min-w-[85px]">Học Phí Tháng</th>
+                </tr>
+            `;
+
+            document.getElementById('historyTableBody').innerHTML = players.map(p => {
+                let attendedCount = 0;
+                dates.forEach(d => {
+                    if (attendanceMap[d]?.includes(p.id)) attendedCount++;
+                });
+                const pct = dates.length > 0 ? Math.round((attendedCount / dates.length) * 100) : 0;
+                const isPaid = p.tuition === 'PAID';
+
+                return `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="p-3 sticky left-0 bg-[#07130c] z-10">
+                            <div class="flex items-center gap-2">
+                                <img src="${p.avatar || '/football-avatar.jpg'}" class="w-6 h-6 rounded-md object-cover border border-amber-400 shrink-0">
+                                <span class="font-extrabold text-white text-xs truncate max-w-[110px]">${p.name}</span>
+                            </div>
+                        </td>
+                        <td class="p-2 text-center">
+                            <span class="text-[9px] font-black px-1.5 py-0.5 rounded ${POS_CONFIG[p.position]?.bg || 'bg-zinc-700'} text-white">${p.position}</span>
+                        </td>
+                        ${dates.map(d => {
+                            const isPresent = attendanceMap[d]?.includes(p.id);
+                            return `
+                                <td onclick="toggleDateAttendance('${p.id}', '${d}')" class="p-2 text-center cursor-pointer ${d === selectedDate ? 'bg-amber-500/10' : ''}">
+                                    ${isPresent 
+                                        ? '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-xs border border-emerald-500/40">✓</span>' 
+                                        : '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-zinc-800 text-zinc-600 font-bold text-xs">✕</span>'}
+                                </td>
+                            `;
+                        }).join('')}
+                        <td class="p-3 text-center font-bold text-xs bg-[#07130c]">
+                            <span class="text-amber-400 font-black">${attendedCount}/${dates.length}b</span>
+                            <span class="block text-[9px] text-zinc-400">(${pct}%)</span>
+                        </td>
+                        <td class="p-3 text-center text-xs">
+                            <button onclick="toggleTuition('${p.id}')" class="px-2 py-1 rounded-lg text-[10px] font-bold ${isPaid ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'}">
+                                ${isPaid ? 'Đã đóng' : 'Chưa đóng'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function toggleDateAttendance(playerId, date) {
+            playKick();
+            const list = attendanceMap[date] || [];
+            const idx = list.indexOf(playerId);
+            if (idx !== -1) list.splice(idx, 1);
+            else list.push(playerId);
+            attendanceMap[date] = list;
+            localStorage.setItem('fifa_standalone_attendance_v4', JSON.stringify(attendanceMap));
+            renderAll();
+        }
+
+        function toggleTuition(playerId) {
+            const p = players.find(i => i.id === playerId);
+            if (p) {
+                p.tuition = (p.tuition === 'PAID') ? 'UNPAID' : 'PAID';
+                localStorage.setItem('fifa_standalone_players_v4', JSON.stringify(players));
+                renderAll();
+                showToast(`Học phí ${p.name}: ${p.tuition === 'PAID' ? 'Đã đóng' : 'Chưa đóng'}`);
+            }
+        }
+
+        function exportToExcelCSV() {
+            const dates = getFilteredDates();
+            let csvContent = '\uFEFF';
+
+            csvContent += `BÁO CÁO ĐIỂM DANH VÀ HỌC PHÍ LỚP BÓNG ĐÁ\n`;
+            csvContent += `Thời gian xuất: ${new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' })}\n`;
+            csvContent += `Quy định gói: ${classSettings.monthlySessions} buổi/tháng - Mức thu: ${classSettings.monthlyFee.toLocaleString('vi-VN')} VNĐ\n\n`;
+
+            const headers = ['STT', 'Họ Và Tên', 'Số Áo', 'Vị Trí', 'Số Buổi Còn', 'Tình Trạng Học Phí'];
+            dates.forEach(d => headers.push(d));
+            headers.push('Tổng Điểm Danh');
+            headers.push('Tỉ Lệ Chuyên Cần (%)');
+            csvContent += headers.map(h => `"${h}"`).join(',') + '\n';
+
+            players.forEach((p, idx) => {
+                let attendedCount = 0;
+                const row = [
+                    idx + 1,
+                    `"${p.name}"`,
+                    `"#${p.jerseyNumber}"`,
+                    `"${p.position}"`,
+                    p.remaining,
+                    p.tuition === 'PAID' ? '"Đã đóng"' : '"Chưa đóng"'
+                ];
+
+                dates.forEach(d => {
+                    const isPresent = attendanceMap[d]?.includes(p.id);
+                    if (isPresent) attendedCount++;
+                    row.push(isPresent ? '"Có mặt (1)"' : '"Vắng (0)"');
+                });
+
+                const pct = dates.length > 0 ? Math.round((attendedCount / dates.length) * 100) : 0;
+                row.push(`"${attendedCount}/${dates.length}"`);
+                row.push(`"${pct}%"`);
+
+                csvContent += row.join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Bao_Cao_Diem_Danh_Bong_Da_${getVietnamToday()}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('📥 Đã tải về file Excel (.csv) thành công!');
+        }
+
+        function renderRoster() {
+            document.getElementById('totalCount').innerText = players.length;
+            document.getElementById('classSettingBadge').innerText = `Gói: ${classSettings.monthlySessions} buổi/tháng • ${classSettings.monthlyFee.toLocaleString('vi-VN')}đ`;
+
+            document.getElementById('rosterList').innerHTML = players.map(p => {
+                const isPaid = p.tuition === 'PAID';
+                return `
+                    <div class="bg-black/50 border border-zinc-800 rounded-2xl p-3 flex items-center justify-between gap-2.5">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-12 h-12 rounded-xl overflow-hidden bg-zinc-800 border-2 border-amber-500/40 shrink-0 relative">
+                                <img src="${p.avatar || '/football-avatar.jpg'}" onerror="this.src='/football-avatar.jpg'" class="w-full h-full object-cover">
+                            </div>
+                            <div>
+                                <div class="font-extrabold text-xs text-white">#${p.jerseyNumber} ${p.name} (${p.position})</div>
+                                <div class="text-[10px] text-zinc-400 mt-0.5">
+                                    Còn <strong class="text-amber-400">${p.remaining}</strong> buổi • 
+                                    <span class="${isPaid ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}">
+                                        ${isPaid ? 'Đã đóng học phí' : 'Chưa đóng học phí'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="openEditModal('${p.id}', event)" class="px-2.5 py-1.5 bg-zinc-800 border border-amber-400/50 text-amber-300 rounded-xl text-xs font-bold active:scale-95 flex items-center gap-1" title="Chỉnh sửa thông tin">
+                                ✏️ Sửa
+                            </button>
+                            <button onclick="triggerPhotoUploadForPlayer('${p.id}', event)" class="px-2 py-1.5 bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-xl text-xs font-bold active:scale-95 flex items-center gap-1" title="Đổi ảnh">
+                                📷 Đổi ảnh
+                            </button>
+                            <button onclick="addSession('${p.id}', classSettings.monthlySessions)" class="px-2.5 py-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-xl text-xs font-bold active:scale-95" title="Cộng số buổi gói tháng">
+                                +${classSettings.monthlySessions}b
+                            </button>
+                            <button onclick="deletePlayer('${p.id}')" class="px-2 py-1.5 bg-rose-950/40 text-rose-400 rounded-xl text-xs font-bold">Xóa</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renewAllForNewMonth() {
+            if (confirm(`Gia hạn tháng mới cho toàn bộ lớp: Mỗi em sẽ được cộng thêm +${classSettings.monthlySessions} buổi học?`)) {
+                players.forEach(p => {
+                    p.remaining = (p.remaining || 0) + classSettings.monthlySessions;
+                    p.tuition = 'PAID';
+                });
+                localStorage.setItem('fifa_standalone_players_v4', JSON.stringify(players));
+                renderAll();
+                showToast(`🎉 Đã gia hạn +${classSettings.monthlySessions} buổi cho cả lớp!`);
+            }
+        }
+
+        function addSession(id, count) {
+            const p = players.find(i => i.id === id);
+            if (p) {
+                p.remaining = (p.remaining || 0) + count;
+                p.tuition = 'PAID';
+                localStorage.setItem('fifa_standalone_players_v4', JSON.stringify(players));
+                renderAll();
+                showToast(`Đã nạp +${count}b cho ${p.name}`);
+            }
+        }
+
+        function deletePlayer(id) {
+            if (confirm('Xóa học viên này khỏi danh sách?')) {
+                players = players.filter(i => i.id !== id);
+                localStorage.setItem('fifa_standalone_players_v4', JSON.stringify(players));
+                renderAll();
+                showToast('Đã xóa học viên');
+            }
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settingMonthlySessions').value = classSettings.monthlySessions;
+            document.getElementById('settingMonthlyFee').value = classSettings.monthlyFee;
+            document.getElementById('modalSettings').classList.remove('hidden');
+        }
+        function closeSettingsModal() { document.getElementById('modalSettings').classList.add('hidden'); }
+        function saveSettings() {
+            const sessions = parseInt(document.getElementById('settingMonthlySessions').value, 10) || 8;
+            const fee = parseInt(document.getElementById('settingMonthlyFee').value, 10) || 600000;
+            classSettings = { monthlySessions: sessions, monthlyFee: fee };
+            localStorage.setItem('fifa_class_settings', JSON.stringify(classSettings));
+            closeSettingsModal();
+            renderAll();
+            showToast(`⚙️ Đã lưu: ${sessions} buổi/tháng • ${fee.toLocaleString('vi-VN')}đ`);
+        }
+
+        let editingPlayerId = null;
+        let currentModalAvatarBase64 = '';
+
+        function openAddModal() {
+            editingPlayerId = null;
+            currentModalAvatarBase64 = '';
+            document.getElementById('modalTitle').innerText = 'Thêm Học Viên Mới';
+            document.getElementById('playerNameInput').value = '';
+            document.getElementById('playerJerseyInput').value = Math.floor(Math.random() * 50) + 1;
+            document.getElementById('playerRatingInput').value = 90;
+            document.getElementById('playerPosInput').value = 'FW';
+            document.getElementById('playerSessionsInput').value = classSettings.monthlySessions;
+            document.getElementById('playerTuitionInput').value = 'PAID';
+            document.getElementById('modalAvatarPreview').src = '/football-avatar.jpg';
+            document.getElementById('modalAdd').classList.remove('hidden');
+        }
+
+        function openEditModal(playerId, event) {
+            if (event) event.stopPropagation();
+            const p = players.find(i => i.id === playerId);
+            if (!p) return;
+
+            editingPlayerId = playerId;
+            currentModalAvatarBase64 = '';
+            document.getElementById('modalTitle').innerText = '✏️ Sửa Thông Tin: ' + p.name;
+            document.getElementById('playerNameInput').value = p.name || '';
+            document.getElementById('playerJerseyInput').value = p.jerseyNumber || 10;
+            document.getElementById('playerRatingInput').value = p.rating || 90;
+            document.getElementById('playerPosInput').value = p.position || 'FW';
+            document.getElementById('playerSessionsInput').value = p.remaining ?? 8;
+            document.getElementById('playerTuitionInput').value = p.tuition || 'PAID';
+            document.getElementById('modalAvatarPreview').src = p.avatar || '/football-avatar.jpg';
+            document.getElementById('modalAdd').classList.remove('hidden');
+        }
+
+        function closeAddModal() { document.getElementById('modalAdd').classList.add('hidden'); }
+
+        document.getElementById('avatarFileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                compressAndResizeImage(file, (compressed) => {
+                    currentModalAvatarBase64 = compressed;
+                    document.getElementById('modalAvatarPreview').src = compressed;
+                    showToast('Đã tải ảnh lên');
+                });
+            }
+        });
+
+        function savePlayer() {
+            const name = document.getElementById('playerNameInput').value.trim();
+            const jersey = parseInt(document.getElementById('playerJerseyInput').value, 10) || 10;
+            const rating = parseInt(document.getElementById('playerRatingInput').value, 10) || 90;
+            const pos = document.getElementById('playerPosInput').value;
+            const sessions = parseInt(document.getElementById('playerSessionsInput').value, 10) || 0;
+            const tuition = document.getElementById('playerTuitionInput').value;
+
+            if (!name) return alert('Vui lòng nhập tên học viên');
+
+            if (editingPlayerId) {
+                const p = players.find(i => i.id === editingPlayerId);
+                if (p) {
+                    p.name = name;
+                    p.jerseyNumber = jersey;
+                    p.rating = rating;
+                    p.position = pos;
+                    p.remaining = sessions;
+                    p.tuition = tuition;
+                    if (currentModalAvatarBase64) p.avatar = currentModalAvatarBase64;
+                    localStorage.setItem('fifa_standalone_players_v4', JSON.stringify(players));
+                    renderAll();
+                    showToast('✅ Đã lưu thay đổi cho ' + name);
+                }
+            } else {
+                players.push({
+                    id: 'p-' + Date.now(),
+                    name,
+                    jerseyNumber: jersey,
+                    rating,
+                    position: pos,
+                    preferredFoot: 'Phải',
+                    remaining: sessions,
+                    tuition,
+                    avatar: currentModalAvatarBase64 || '/football-avatar.jpg'
+                });
+                localStorage.setItem('fifa_standalone_players_v4', JSON.stringify(players));
+                renderAll();
+                showToast('⚽ Đã thêm học viên ' + name);
+            }
+
+            closeAddModal();
+        }
+
+        function renderStats() {
+            const currentList = attendanceMap[selectedDate] || [];
+            document.getElementById('statPresent').innerText = currentList.length + ' em';
+            document.getElementById('statAbsent').innerText = (players.length - currentList.length) + ' em';
+            document.getElementById('statRate').innerText = Math.round((currentList.length / (players.length || 1)) * 100) + '%';
+        }
+
+        function renderAll() {
+            renderStats();
+            setGridCols(currentGridCols);
+            renderHistoryTable();
+            renderRoster();
+        }
+
+        renderAll();
+    </script>
+</body>
+</html>

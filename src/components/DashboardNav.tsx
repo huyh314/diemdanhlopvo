@@ -66,6 +66,15 @@ export default function DashboardNav() {
                                     </Link>
                                 );
                             })}
+                            <Link
+                                href="/football"
+                                onClick={playClick}
+                                className="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30 transition flex items-center gap-1"
+                                title="Chuyển sang Lớp Bóng Đá"
+                            >
+                                <span>⚽</span>
+                                <span>Lớp Bóng Đá</span>
+                            </Link>
                         </div>
 
                         {/* Divider */}
