@@ -4,6 +4,7 @@
 
 import { getStudents } from '@/lib/dal';
 import { GROUPS } from '@/lib/constants';
+import { mediaAccessUrl } from '@/lib/media-url';
 
 export const metadata = {
     title: 'Danh Sách Học Sinh — Võ Đường Manager',
@@ -44,7 +45,7 @@ export default async function StudentsPage() {
                                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-base font-bold text-white shrink-0">
                                         {s.avatar_url ? (
                                             <img
-                                                src={s.avatar_url}
+                                                src={mediaAccessUrl(s.avatar_url)}
                                                 alt={s.name}
                                                 className="w-full h-full object-cover rounded-full"
                                             />

@@ -4,6 +4,8 @@ import { useState, useTransition, useRef, useCallback } from 'react';
 import { createLessonPlanAction, updateLessonPlanAction } from '@/lib/lesson-plan.actions';
 import type { LessonPlanRow, LessonPlanContent, LessonPlanSection, GroupId } from '@/types/database.types';
 import { GROUPS } from '@/lib/constants';
+import { mediaAccessUrl } from '@/lib/media-url';
+import { uploadLessonMedia } from '@/lib/upload-media';
 
 // =============================================
 // SECTION CONFIG
@@ -59,11 +61,11 @@ function ImageLightbox({ url, onClose }: { url: string; onClose: () => void }) {
                 ×
             </button>
             {url.match(/\.(mp4|webm|mov)$/i) ? (
-                <video src={url} controls className="max-w-full max-h-full rounded-xl shadow-2xl" onClick={(e) => e.stopPropagation()} style={{ maxHeight: 'calc(100vh - 80px)' }} />
+                <video src={mediaAccessUrl(url)} controls className="max-w-full max-h-full rounded-xl shadow-2xl" onClick={(e) => e.stopPropagation()} style={{ maxHeight: 'calc(100vh - 80px)' }} />
             ) : (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                    src={url}
+                    src={mediaAccessUrl(url)}
                     alt="Tài liệu giáo án"
                     className="max-w-full max-h-full rounded-xl object-contain shadow-2xl"
                     onClick={(e) => e.stopPropagation()}
@@ -139,7 +141,7 @@ function ImageUploadZone({
                             onClick={() => onPreview(url)}
                         >
                             {url.match(/\.(mp4|webm|mov)$/i) ? (
-                                <video src={url} className="w-full h-full object-cover transition group-hover:scale-105" />
+                                <video src={mediaAccessUrl(url)} className="w-full h-full object-cover transition group-hover:scale-105" />
                             ) : url.match(/\.(doc|docx|xls|xlsx)$/i) ? (
                                 <div className="w-full h-full flex flex-col items-center justify-center bg-white/10 text-[var(--text-secondary)]">
                                     <span className="text-3xl mb-1">{url.match(/\.(doc|docx)$/i) ? '📄' : '📊'}</span>
@@ -150,7 +152,7 @@ function ImageUploadZone({
                             ) : (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
-                                    src={url}
+                                    src={mediaAccessUrl(url)}
                                     alt="Tài liệu"
                                     className="w-full h-full object-cover transition group-hover:scale-105"
                                 />
@@ -355,37 +357,20 @@ export default function LessonPlanModal({
         await Promise.all(
             newEntries.map(async (entry) => {
                 try {
-                    const fd = new FormData();
-                    fd.append('file', entry.file);
-
-                    const res = await fetch('/api/upload-media', {
-                        method: 'POST',
-                        body: fd,
-                    });
-                    const json = await res.json();
-
-                    if (!res.ok) {
-                        setUploading((prev) =>
-                            prev.map((u) =>
-                                u.id === entry.id
-                                    ? { ...u, progress: 'error', error: json.error ?? 'Upload thất bại' }
-                                    : u
-                            )
-                        );
-                    } else {
-                        setUploading((prev) =>
-                            prev.map((u) =>
-                                u.id === entry.id
-                                    ? { ...u, progress: 'done', url: json.url, path: json.path }
-                                    : u
-                            )
-                        );
-                    }
-                } catch {
+                    const uploaded = await uploadLessonMedia(entry.file);
                     setUploading((prev) =>
                         prev.map((u) =>
                             u.id === entry.id
-                                ? { ...u, progress: 'error', error: 'Lỗi kết nối' }
+                                ? { ...u, progress: 'done', url: uploaded.url, path: uploaded.path }
+                                : u
+                        )
+                    );
+                } catch (error) {
+                    const message = error instanceof Error ? error.message : 'Upload thất bại';
+                    setUploading((prev) =>
+                        prev.map((u) =>
+                            u.id === entry.id
+                                ? { ...u, progress: 'error', error: message }
                                 : u
                         )
                     );
@@ -581,7 +566,7 @@ export default function LessonPlanModal({
                                             <div key={tid} className="flex items-center gap-2 pr-2 pl-1 py-1 rounded-full bg-[var(--bg-primary)] border border-[var(--border-primary)] text-xs">
                                                 {t.media_url ? (
                                                     // eslint-disable-next-line @next/next/no-img-element
-                                                    <img src={t.media_url} alt="" className="w-5 h-5 rounded-full object-cover" />
+                                                    <img src={mediaAccessUrl(t.media_url)} alt="" className="w-5 h-5 rounded-full object-cover" />
                                                 ) : <span className="w-5 h-5 flex items-center justify-center bg-black/40 rounded-full">🥋</span>}
                                                 <span className="font-semibold truncate max-w-[120px]">{t.title}</span>
                                                 <button type="button" onClick={() => setTechniqueIds(prev => prev.filter(id => id !== tid))} className="w-4 h-4 flex items-center justify-center rounded-full bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white transition">×</button>
@@ -614,7 +599,7 @@ export default function LessonPlanModal({
                                                             ) : null}
                                                             {tech.media_url ? (
                                                                 // eslint-disable-next-line @next/next/no-img-element
-                                                                <img src={tech.media_url} alt="" className="w-full h-full object-cover" />
+                                                                <img src={mediaAccessUrl(tech.media_url)} alt="" className="w-full h-full object-cover" />
                                                             ) : <span className="text-xl opacity-50">🥋</span>}
                                                             
                                                             {isSelected && (

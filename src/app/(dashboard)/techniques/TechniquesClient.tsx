@@ -4,6 +4,8 @@ import { useState, useTransition, useRef } from 'react';
 import type { TechniqueRow } from '@/types/database.types';
 import { createTechniqueAction, deleteTechniqueAction } from '@/lib/technique.actions';
 import { Button } from '@/components/ui';
+import { mediaAccessUrl } from '@/lib/media-url';
+import { uploadLessonMedia } from '@/lib/upload-media';
 
 export default function TechniquesClient({ initialTechniques }: { initialTechniques: TechniqueRow[] }) {
     const [techniques, setTechniques] = useState(initialTechniques);
@@ -49,17 +51,7 @@ export default function TechniquesClient({ initialTechniques }: { initialTechniq
         setUploading(true);
 
         try {
-            // Upload file
-            const fd = new FormData();
-            fd.append('file', file);
-
-            const uploadRes = await fetch('/api/upload-media', {
-                method: 'POST',
-                body: fd,
-            });
-            const uploadJson = await uploadRes.json();
-
-            if (!uploadRes.ok) throw new Error(uploadJson.error || 'Upload thất bại');
+            const uploaded = await uploadLessonMedia(file);
 
             const isVideo = file.type.startsWith('video/');
 
@@ -68,7 +60,7 @@ export default function TechniquesClient({ initialTechniques }: { initialTechniq
                 const result = await createTechniqueAction({
                     title,
                     description,
-                    media_url: uploadJson.url,
+                    media_url: uploaded.url,
                     media_type: isVideo ? 'video' : 'image',
                 });
 
@@ -118,10 +110,10 @@ export default function TechniquesClient({ initialTechniques }: { initialTechniq
                     <div key={tech.id} className="group relative rounded-xl border border-[var(--border-primary)] bg-[var(--bg-secondary)] overflow-hidden shadow-md flex flex-col">
                         <div className="aspect-square bg-black/50 relative overflow-hidden flex items-center justify-center">
                             {tech.media_type === 'video' ? (
-                                <video src={tech.media_url} controls className="w-full h-full object-cover" />
+                                <video src={mediaAccessUrl(tech.media_url)} controls className="w-full h-full object-cover" />
                             ) : (
                                 // eslint-disable-next-line @next/next/no-img-element
-                                <img src={tech.media_url} alt={tech.title} className="w-full h-full object-cover" />
+                                <img src={mediaAccessUrl(tech.media_url)} alt={tech.title} className="w-full h-full object-cover" />
                             )}
                             <button
                                 onClick={() => handleDelete(tech.id)}

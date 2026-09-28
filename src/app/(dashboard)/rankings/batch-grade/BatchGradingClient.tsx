@@ -7,6 +7,7 @@ import { useToast } from '@/components/Toast';
 import { saveBatchScoresAction, fetchAutoChuyenCanBatch } from './actions';
 import { StudentRow, ScoreCategory } from '@/types/database.types';
 import { getGroupShortName } from '@/lib/constants';
+import { mediaAccessUrl } from '@/lib/media-url';
 
 interface ScoreCriteriaItem {
     label: string;
@@ -61,7 +62,7 @@ const MemoizedStudentRow = React.memo(({
                 <div className="w-11 h-11 rounded-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center text-sm font-bold text-white shrink-0 shadow-inner">
                     {student.avatar_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover rounded-full" />
+                        <img src={mediaAccessUrl(student.avatar_url)} alt={student.name} className="w-full h-full object-cover rounded-full" />
                     ) : (
                         student.name.split(' ').map(w => w[0]).slice(-2).join('').toUpperCase()
                     )}
