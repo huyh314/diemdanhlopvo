@@ -8,11 +8,6 @@ const AVATAR_PATH_PATTERN = /^[0-9a-f-]{36}-\d+\.[a-z0-9]{1,10}$/i;
 
 export async function GET(request: NextRequest) {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const bucket = request.nextUrl.searchParams.get('bucket') ?? 'lesson-attachments';
     const path = request.nextUrl.searchParams.get('path') ?? '';
     const segments = path.split('/');

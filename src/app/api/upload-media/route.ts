@@ -17,9 +17,6 @@ const ALLOWED_TYPES: Record<string, string> = {
 export async function POST(req: NextRequest) {
     try {
         const supabase = await createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
         const body: unknown = await req.json();
         if (!body || typeof body !== 'object') {
             return NextResponse.json({ error: 'Thông tin file không hợp lệ' }, { status: 400 });
@@ -32,7 +29,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'File phải nhỏ hơn hoặc bằng 50MB' }, { status: 400 });
         }
 
-        const path = `${user.id}/${Date.now()}-${crypto.randomUUID()}.${ALLOWED_TYPES[contentType]}`;
+        const path = `${crypto.randomUUID()}/${Date.now()}-${crypto.randomUUID()}.${ALLOWED_TYPES[contentType]}`;
         const { data, error } = await supabase.storage.from(BUCKET).createSignedUploadUrl(path);
         if (error || !data) {
             console.error('Create signed upload URL error:', error);
