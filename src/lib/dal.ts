@@ -90,6 +90,21 @@ export async function deleteStudent(id: string) {
     if (error) throw new Error(`Failed to delete student: ${error.message}`);
 }
 
+export async function bulkDeleteStudents(ids: string[]) {
+    if (ids.length === 0) return 0;
+
+    const supabase = await createClient();
+    const { data, error } = await supabase
+        .from('students')
+        .update({ is_active: false })
+        .in('id', ids)
+        .eq('is_active', true)
+        .select('id');
+
+    if (error) throw new Error(`Failed to delete students: ${error.message}`);
+    return data.length;
+}
+
 // =============================================
 // SESSIONS & ATTENDANCE
 // =============================================
