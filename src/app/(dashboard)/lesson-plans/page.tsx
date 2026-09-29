@@ -41,12 +41,13 @@ export default async function LessonPlansPage() {
     const extendedTo = new Date(toDate);
     extendedTo.setDate(extendedTo.getDate() + 28);
 
-    const plans = await getLessonPlans({
-        fromDate: extendedFrom.toLocaleDateString('en-CA'),
-        toDate: extendedTo.toLocaleDateString('en-CA'),
-    });
-
-    const techniques = await getTechniques();
+    const [plans, techniques] = await Promise.all([
+        getLessonPlans({
+            fromDate: extendedFrom.toLocaleDateString('en-CA'),
+            toDate: extendedTo.toLocaleDateString('en-CA'),
+        }),
+        getTechniques(),
+    ]);
 
     return (
         <div className="space-y-6">

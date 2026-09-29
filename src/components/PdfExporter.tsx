@@ -13,7 +13,8 @@ interface PdfExporterProps {
 }
 
 export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
-    const [isExporting, setIsExporting] = useState(false);
+    const [exportKind, setExportKind] = useState<'ranking' | 'reports' | null>(null);
+    const isExporting = exportKind !== null;
     const [showBxhPreview, setShowBxhPreview] = useState(false);
     const [showPhieuPreview, setShowPhieuPreview] = useState(false);
     const { toast } = useToast();
@@ -23,7 +24,7 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
     // --- BXH Export (PDF) ---
     async function exportRankingPdf() {
         if (rankings.length === 0) return;
-        setIsExporting(true);
+        setExportKind('ranking');
         toast('Đang xử lý xuất Bảng Xếp Hạng...', 'info');
         try {
             const html2canvas = (await import('html2canvas')).default;
@@ -56,14 +57,14 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
             console.error(err);
             toast('Lỗi xuất PDF: ' + (err as Error).message, 'error');
         } finally {
-            setIsExporting(false);
+            setExportKind(null);
         }
     }
 
     // --- Phiếu Kết Quả Export (PDF) ---
     async function exportAllReportsPdf() {
         if (rankings.length === 0) return;
-        setIsExporting(true);
+        setExportKind('reports');
         toast(`Đang xử lý ${rankings.length} phiếu kết quả... Vui lòng đợi!`, 'info');
 
         try {
@@ -94,7 +95,7 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
             console.error(err);
             toast('Lỗi xuất Phiếu KQ: ' + (err as Error).message, 'error');
         } finally {
-            setIsExporting(false);
+            setExportKind(null);
         }
     }
 
@@ -144,19 +145,21 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
                 </ReportPreviewModal>
             )}
 
-            {/* Hidden Templates for HTML2Canvas — luôn tồn tại trong DOM */}
-            <div style={{ position: 'absolute', top: 0, left: '-20000px', width: '210mm' }} aria-hidden="true">
-                {groups.map(g => (
-                    <div key={`ranking-${g}`} id={`pdf-ranking-template-${g}`} className="bg-white">
-                        <RankingTemplate rankings={rankings as any} week={weekKey} groupId={g} />
-                    </div>
-                ))}
-                {rankings.map(s => (
-                    <div key={s.student_id} id={`pdf-report-${s.student_id}`} className="bg-white" style={{ position: 'absolute', top: 0, left: 0, width: '210mm', height: '297mm' }}>
-                        <SemesterReportTemplate student={s} week={weekKey} />
-                    </div>
-                ))}
-            </div>
+            {/* Mount print layouts only on demand; retain them if the preview closes during export. */}
+            {(showBxhPreview || showPhieuPreview || isExporting) && (
+                <div style={{ position: 'absolute', top: 0, left: '-20000px', width: '210mm' }} aria-hidden="true">
+                    {(showBxhPreview || exportKind === 'ranking') && groups.map(g => (
+                        <div key={`ranking-${g}`} id={`pdf-ranking-template-${g}`} className="bg-white">
+                            <RankingTemplate rankings={rankings as any} week={weekKey} groupId={g} />
+                        </div>
+                    ))}
+                    {(showPhieuPreview || exportKind === 'reports') && rankings.map(s => (
+                        <div key={s.student_id} id={`pdf-report-${s.student_id}`} className="bg-white" style={{ position: 'absolute', top: 0, left: 0, width: '210mm', height: '297mm' }}>
+                            <SemesterReportTemplate student={s} week={weekKey} />
+                        </div>
+                    ))}
+                </div>
+            )}
         </>
     );
 }
