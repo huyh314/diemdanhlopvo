@@ -6,6 +6,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { useToast } from './Toast';
 import { saveAttendanceAction } from '@/lib/actions';
+import { mediaAccessUrl } from '@/lib/media-url';
 import { enqueueSyncAction } from '@/lib/offline-db';
 import type { StudentRow, AttendanceStatus, GroupId } from '@/types/database.types';
 import { Button, Badge } from './ui';
@@ -350,7 +351,7 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
                                 )}
                                 <div className={`w-full h-full rounded-full bg-gradient-to-br ${getGradient(student.name)} flex items-center justify-center text-lg font-bold text-white shadow-xl ring-2 ${status === 'present' ? 'ring-emerald-400/30' : 'ring-white/5'}`}>
                                     {student.avatar_url ? (
-                                        <img src={student.avatar_url} alt={student.name} className="w-full h-full object-cover rounded-full" />
+                                        <img src={mediaAccessUrl(student.avatar_url)} alt={student.name} className="w-full h-full object-cover rounded-full" />
                                     ) : (
                                         getInitials(student.name)
                                     )}

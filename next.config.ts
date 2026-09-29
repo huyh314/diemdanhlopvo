@@ -9,6 +9,12 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      // Leave headroom for multipart framing while staying under Netlify's request cap.
+      bodySizeLimit: '4.5mb',
+    },
+  },
   turbopack: {},
 };
 

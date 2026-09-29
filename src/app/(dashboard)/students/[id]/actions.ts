@@ -55,12 +55,19 @@ export async function uploadAvatarAction(id: string, formData: FormData) {
         const file = formData.get('avatar') as File | null;
         if (!file || file.size === 0) return { error: 'Vui lòng chọn một tệp ảnh hợp lệ' };
 
-        if (file.size > 5 * 1024 * 1024) {
-            return { error: 'Kích thước ảnh vượt quá 5MB. Vui lòng chọn ảnh nhỏ hơn.' };
+        if (file.size > 4 * 1024 * 1024) {
+            return { error: 'Kích thước ảnh vượt quá 4MB. Vui lòng chọn ảnh nhỏ hơn 4MB.' };
         }
 
         const supabase = await createClient();
-        const ext = file.name.split('.').pop() || 'jpg';
+        const extensions: Record<string, string> = {
+            'image/jpeg': 'jpg',
+            'image/png': 'png',
+            'image/webp': 'webp',
+            'image/gif': 'gif',
+        };
+        const ext = extensions[file.type];
+        if (!ext) return { error: 'Chỉ hỗ trợ ảnh JPG, PNG, WebP hoặc GIF.' };
         const fileName = `${id}-${Date.now()}.${ext}`;
 
         const { data, error } = await supabase.storage
@@ -75,12 +82,10 @@ export async function uploadAvatarAction(id: string, formData: FormData) {
             return { error: 'Lỗi tải ảnh lên: ' + error.message };
         }
 
-        const { data: { publicUrl } } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(fileName);
+        const avatarUrl = `/api/media?bucket=avatars&path=${encodeURIComponent(fileName)}`;
 
-        // Lưu URL vào thông tin học sinh trong CSDL
-        await updateStudent(id, { avatar_url: publicUrl });
+        // Lưu URL được bảo vệ; ảnh chỉ được phát qua endpoint đăng nhập.
+        await updateStudent(id, { avatar_url: avatarUrl });
 
         // Yêu cầu Next.js xóa cache và tải lại dữ liệu mới nhất
         revalidatePath(`/students/${id}`);
@@ -88,7 +93,7 @@ export async function uploadAvatarAction(id: string, formData: FormData) {
         revalidatePath('/');
         revalidatePath('/rankings/batch-grade');
 
-        return { success: true, url: publicUrl };
+        return { success: true, url: avatarUrl };
     } catch (e) {
         console.error('Lỗi khi cập nhật ảnh đại diện:', e);
         return { error: e instanceof Error ? e.message : 'Có lỗi hệ thống xảy ra khi tải ảnh' };

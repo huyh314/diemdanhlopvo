@@ -6,6 +6,7 @@ import { updateStudentAction, deleteStudentAction, uploadAvatarAction } from '..
 import { GROUPS, getGroupName } from '@/lib/constants';
 import { useToast } from '@/components/Toast';
 import { StudentRow } from '@/types/database.types';
+import { mediaAccessUrl } from '@/lib/media-url';
 
 export default function StudentProfile({ student }: { student: StudentRow }) {
     const [isEditing, setIsEditing] = useState(false);
@@ -162,7 +163,7 @@ export default function StudentProfile({ student }: { student: StudentRow }) {
                     <div className="w-full h-full rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-2xl font-bold text-white overflow-hidden shadow-lg border-2 border-transparent group-hover:border-[var(--accent-from)] transition-all">
                         {student.avatar_url ? (
                             <img
-                                src={student.avatar_url}
+                                src={mediaAccessUrl(student.avatar_url)}
                                 alt={student.name}
                                 className="w-full h-full object-cover"
                             />

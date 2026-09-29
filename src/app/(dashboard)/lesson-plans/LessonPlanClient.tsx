@@ -6,6 +6,7 @@ import type { LessonPlanRow, LessonPlanSection, GroupId } from '@/types/database
 import { GROUPS, getGroupName } from '@/lib/constants';
 import { deleteLessonPlanAction } from '@/lib/lesson-plan.actions';
 import LessonPlanModal from './LessonPlanModal';
+import { mediaAccessUrl } from '@/lib/media-url';
 
 // =============================================
 // DATE UTILS
@@ -152,7 +153,7 @@ function PlanCard({
                                 return (
                                     <a
                                         key={i}
-                                        href={url}
+                                        href={mediaAccessUrl(url)}
                                         target="_blank"
                                         rel="noreferrer"
                                         className="w-10 h-10 shrink-0 rounded-lg flex flex-col items-center justify-center bg-white/10 border border-white/10 hover:scale-110 transition-transform cursor-pointer text-white text-[10px]"
@@ -169,7 +170,7 @@ function PlanCard({
                                 return (
                                     <video
                                         key={i}
-                                        src={url}
+                                        src={mediaAccessUrl(url)}
                                         className="w-10 h-10 shrink-0 rounded-lg object-cover border border-white/10 hover:scale-110 transition-transform cursor-pointer"
                                         title="Video tài liệu"
                                     />
@@ -179,7 +180,7 @@ function PlanCard({
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                     key={i}
-                                    src={url}
+                                    src={mediaAccessUrl(url)}
                                     alt={`Tài liệu ${i + 1}`}
                                     className="w-10 h-10 shrink-0 rounded-lg object-cover border border-white/10 hover:scale-110 transition-transform cursor-pointer"
                                     title="Ảnh tài liệu"
