@@ -105,6 +105,7 @@ export default function DashboardNav() {
                     {/* Left 2: Điểm Danh + Xếp Hạng */}
                     <Link
                         href={NAV_ITEMS[0].href}
+                        prefetch={true}
                         onClick={playClick}
                         className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[0].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                     >
@@ -114,6 +115,7 @@ export default function DashboardNav() {
 
                     <Link
                         href={NAV_ITEMS[1].href}
+                        prefetch={true}
                         onClick={playClick}
                         className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[1].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                     >
@@ -137,6 +139,7 @@ export default function DashboardNav() {
                     {/* Right 2: Giáo Án + Học Sinh */}
                     <Link
                         href={NAV_ITEMS[2].href}
+                        prefetch={true}
                         onClick={playClick}
                         className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[2].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                     >
@@ -146,6 +149,7 @@ export default function DashboardNav() {
 
                     <Link
                         href={NAV_ITEMS[3].href}
+                        prefetch={true}
                         onClick={playClick}
                         className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[3].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                     >
