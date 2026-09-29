@@ -61,7 +61,7 @@ export default function StudentsList({ groups, total }: { groups: StudentGroup[]
         startTransition(async () => {
             const result = await bulkDeleteStudentsAction(ids);
             if ('error' in result) {
-                setMessage(result.error);
+                setMessage(result.error ?? 'Không thể xóa học sinh. Vui lòng thử lại.');
                 return;
             }
 

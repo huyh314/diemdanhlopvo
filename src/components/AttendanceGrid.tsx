@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useTransition, useMemo, useRef, useEffect } from 'react';
+import { useState, useTransition, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
 import { useToast } from './Toast';
 import { saveAttendanceAction } from '@/lib/actions';
 import { mediaAccessUrl } from '@/lib/media-url';
@@ -98,7 +97,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
     // ... (rest of the state and computations)
     const [search, setSearch] = useState('');
     const [isPending, startTransition] = useTransition();
-    const gridRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
 
     // Tính toán hasChanges tự động dựa trên so sánh statuses và initialStatuses
@@ -126,24 +124,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
         const q = search.toLowerCase();
         return initialStudents.filter((s) => s.name.toLowerCase().includes(q));
     }, [initialStudents, search]);
-
-    // GSAP Stagger Animation
-    useGSAP(() => {
-        if (!gridRef.current) return;
-
-        // Reset opacity before animating
-        gsap.set('.student-card', { opacity: 0, y: 40, rotationX: 15 });
-
-        gsap.to('.student-card', {
-            opacity: 1,
-            y: 0,
-            rotationX: 0,
-            duration: 0.6,
-            stagger: 0.05,
-            ease: 'power3.out',
-            clearProps: 'transform' // clean up after animation to allow hover effects
-        });
-    }, [filtered]);
 
     // Stats
     const stats = useMemo(() => {
@@ -317,7 +297,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
 
             {/* Grid with 3D Perspective */}
             <div
-                ref={gridRef}
                 className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 perspective-[1000px]"
             >
                 {filtered.map((student) => {
