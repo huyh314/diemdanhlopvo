@@ -84,7 +84,7 @@ export async function uploadAvatarAction(id: string, formData: FormData) {
 
         const avatarUrl = `/api/media?bucket=avatars&path=${encodeURIComponent(fileName)}`;
 
-        // Lưu URL được bảo vệ; ảnh chỉ được phát qua endpoint đăng nhập.
+        // Ảnh đi qua endpoint media để bucket vẫn có thể đặt ở chế độ riêng tư.
         await updateStudent(id, { avatar_url: avatarUrl });
 
         // Yêu cầu Next.js xóa cache và tải lại dữ liệu mới nhất

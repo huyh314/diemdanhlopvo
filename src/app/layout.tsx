@@ -6,6 +6,7 @@ import PwaSetup from '@/components/PwaSetup';
 export const metadata: Metadata = {
   title: 'Võ Đường Manager',
   description: 'Hệ thống quản lý điểm danh và xếp hạng võ sinh',
+  robots: { index: false, follow: false },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
