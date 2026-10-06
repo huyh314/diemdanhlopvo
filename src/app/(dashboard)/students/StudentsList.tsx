@@ -13,7 +13,7 @@ type StudentGroup = {
     students: StudentRow[];
 };
 
-export default function StudentsList({ groups, total }: { groups: StudentGroup[]; total: number }) {
+export default function StudentsList({ groups, total, readOnly = false }: { groups: StudentGroup[]; total: number; readOnly?: boolean }) {
     const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
     const [message, setMessage] = useState('');
     const [isPending, startTransition] = useTransition();
@@ -51,7 +51,7 @@ export default function StudentsList({ groups, total }: { groups: StudentGroup[]
 
     function deleteSelected() {
         const ids = [...selectedIds];
-        if (!ids.length || isPending) return;
+        if (!ids.length || isPending || readOnly) return;
 
         const confirmed = window.confirm(
             `Ẩn ${ids.length} học sinh khỏi danh sách? Lịch sử điểm danh và điểm thi đua của các em vẫn được giữ lại.`,
@@ -90,7 +90,7 @@ export default function StudentsList({ groups, total }: { groups: StudentGroup[]
                         type="checkbox"
                         checked={allSelected}
                         onChange={toggleAll}
-                        disabled={isPending || allStudents.length === 0}
+                        disabled={isPending || readOnly || allStudents.length === 0}
                         className="h-4 w-4 accent-cyan-400"
                         aria-label="Chọn tất cả học sinh"
                     />
@@ -102,7 +102,7 @@ export default function StudentsList({ groups, total }: { groups: StudentGroup[]
                 <button
                     type="button"
                     onClick={deleteSelected}
-                    disabled={selectedIds.size === 0 || isPending}
+                    disabled={selectedIds.size === 0 || isPending || readOnly}
                     className="ml-auto rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                     {isPending ? 'Đang xóa…' : `Xóa đã chọn${selectedIds.size ? ` (${selectedIds.size})` : ''}`}
@@ -141,7 +141,7 @@ export default function StudentsList({ groups, total }: { groups: StudentGroup[]
                                     if (element) element.indeterminate = !groupSelected && groupPartiallySelected;
                                 }}
                                 onChange={() => toggleGroup(group)}
-                                disabled={isPending}
+                                disabled={isPending || readOnly}
                                 className="h-4 w-4 accent-cyan-400"
                                 aria-label={`Chọn tất cả học sinh nhóm ${group.name}`}
                             />
@@ -165,7 +165,7 @@ export default function StudentsList({ groups, total }: { groups: StudentGroup[]
                                             type="checkbox"
                                             checked={isSelected}
                                             onChange={() => toggleStudent(student.id)}
-                                            disabled={isPending}
+                                            disabled={isPending || readOnly}
                                             className="ml-1 h-4 w-4 shrink-0 accent-cyan-400"
                                             aria-label={`Chọn ${student.name}`}
                                         />

@@ -5,6 +5,7 @@ import { GROUPS } from '@/lib/constants';
 import { STUDENTS_CHANGED_EVENT } from '@/lib/students-events';
 import type { StudentRow } from '@/types/database.types';
 import { createClient } from '@/utils/supabase/client';
+import { readStudentsSnapshot, saveStudentsSnapshot } from '@/lib/students-snapshot';
 import StudentsList from './StudentsList';
 import StudentsLoading from './loading';
 
@@ -13,6 +14,15 @@ export default function StudentsLoader() {
     const [error, setError] = useState('');
     const [pending, setPending] = useState(true);
     const [revision, setRevision] = useState(0);
+    const [showingSnapshot, setShowingSnapshot] = useState(false);
+
+    useEffect(() => {
+        const snapshot = readStudentsSnapshot();
+        if (snapshot) {
+            setStudents(snapshot);
+            setShowingSnapshot(true);
+        }
+    }, []);
 
     useEffect(() => {
         let disposed = false;
@@ -33,6 +43,8 @@ export default function StudentsLoader() {
                 if (disposed || activeRequest !== request) return;
                 if (queryError) throw queryError;
                 setStudents(data ?? []);
+                saveStudentsSnapshot(data ?? []);
+                setShowingSnapshot(false);
                 setError('');
             } catch {
                 if (!disposed && activeRequest === request) {
@@ -68,6 +80,7 @@ export default function StudentsLoader() {
     return (
         <div className="space-y-3" data-students-ready={students !== null}>
             <div className="flex flex-wrap items-center justify-end gap-2 text-sm">
+                {showingSnapshot && <p role="status" className="mr-auto text-[var(--text-secondary)]">Danh sách từ lần mở trước{pending ? ' — đang cập nhật…' : ''}</p>}
                 {error && <p role="alert" className="mr-auto text-amber-400">{error}{students !== null ? ' Đang hiển thị danh sách đã tải trước đó.' : ''}</p>}
                 <button type="button" onClick={() => setRevision(value => value + 1)} disabled={pending}
                     className="min-h-10 rounded-lg border border-[var(--border-primary)] px-3 disabled:opacity-50">
@@ -76,7 +89,7 @@ export default function StudentsLoader() {
             </div>
             {students === null
                 ? error && !pending ? <p className="py-8 text-center text-[var(--text-secondary)]">Chưa có danh sách để hiển thị.</p> : <StudentsLoading />
-                : <StudentsList groups={groups} total={students.length} />}
+                : <StudentsList groups={groups} total={students.length} readOnly={showingSnapshot || pending || !!error} />}
         </div>
     );
 }
