@@ -7,6 +7,7 @@ import { GROUPS, getGroupName } from '@/lib/constants';
 import { useToast } from '@/components/Toast';
 import { StudentRow } from '@/types/database.types';
 import StudentAvatar from '@/components/StudentAvatar';
+import { notifyStudentsChanged } from '@/lib/students-events';
 
 export default function StudentProfile({ student }: { student: StudentRow }) {
     const [isEditing, setIsEditing] = useState(false);
@@ -22,6 +23,7 @@ export default function StudentProfile({ student }: { student: StudentRow }) {
             if (result?.error) {
                 toast(result.error, 'error');
             } else {
+                notifyStudentsChanged();
                 toast('Đã cập nhật thông tin học sinh', 'success');
                 setIsEditing(false);
             }
@@ -38,6 +40,7 @@ export default function StudentProfile({ student }: { student: StudentRow }) {
             if (result?.error) {
                 toast(result.error, 'error');
             } else {
+                notifyStudentsChanged();
                 toast('Đã xóa học sinh', 'success');
                 router.push('/students');
             }

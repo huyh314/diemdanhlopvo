@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
     }
 
     const response = NextResponse.redirect(data.signedUrl);
-    response.headers.set('Cache-Control', 'private, no-store');
+    // Avatar filenames change with each upload. Reuse the redirect briefly on this
+    // device; the five-minute cache expires well before the one-hour signed URL.
+    response.headers.set('Cache-Control', bucket === 'avatars' ? 'private, max-age=300' : 'private, no-store');
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     return response;
 }

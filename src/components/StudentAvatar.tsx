@@ -2,7 +2,6 @@
 
 import { useRef, useState } from 'react';
 import { AVATAR_ACCEPT } from '@/lib/avatar';
-import { uploadStudentAvatar } from '@/lib/avatar-upload';
 import { mediaAccessUrl } from '@/lib/media-url';
 import { useToast } from './Toast';
 
@@ -30,6 +29,7 @@ export default function StudentAvatar({ studentId, name, avatarUrl, size = 'card
         busyRef.current = true;
         setIsUploading(true);
         try {
+            const { uploadStudentAvatar } = await import('@/lib/avatar-upload');
             const url = await uploadStudentAvatar(studentId, file);
             setLocalAvatar({ original: avatarUrl, url });
             toast(`Đã cập nhật ảnh của ${name}`, 'success');
@@ -43,10 +43,12 @@ export default function StudentAvatar({ studentId, name, avatarUrl, size = 'card
 
     return (
         <div className="flex shrink-0 flex-col items-center gap-1" aria-busy={isUploading}>
-            <div className={`${size === 'profile' ? 'h-20 w-20 text-2xl' : 'h-14 w-14 text-lg'} flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 font-bold text-white shadow-lg`}>
+            <div className={`${size === 'profile' ? 'h-28 w-28 text-3xl' : 'h-24 w-24 text-2xl'} flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 font-bold text-white shadow-lg`}>
                 {imageUrl && failedImage !== imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={imageUrl} alt={name} className="h-full w-full object-cover" onError={() => setFailedImage(imageUrl)} />
+                    <img src={imageUrl} alt={name} width={size === 'profile' ? 112 : 96} height={size === 'profile' ? 112 : 96}
+                        loading={size === 'profile' ? 'eager' : 'lazy'} decoding="async"
+                        className="h-full w-full object-cover" onError={() => setFailedImage(imageUrl)} />
                 ) : name.trim().split(/\s+/).map(word => word[0]).slice(-2).join('').toUpperCase()}
             </div>
             <input ref={inputRef} type="file" accept={AVATAR_ACCEPT} className="hidden" disabled={isUploading}
