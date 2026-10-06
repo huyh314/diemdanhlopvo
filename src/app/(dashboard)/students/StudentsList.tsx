@@ -174,6 +174,10 @@ export default function StudentsList({ groups, total }: { groups: StudentGroup[]
                                                     <img
                                                         src={mediaAccessUrl(student.avatar_url)}
                                                         alt={student.name}
+                                                        width={48}
+                                                        height={48}
+                                                        loading="lazy"
+                                                        decoding="async"
                                                         className="h-full w-full rounded-full object-cover"
                                                     />
                                                 ) : (

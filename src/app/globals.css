@@ -3,7 +3,6 @@
    Main entry point — imports all modules
    ======================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/postcss';
 
@@ -12,12 +11,16 @@
 @import './animations.css';
 @import './components.css';
 
+:root {
+    --font-montserrat: 'Montserrat Variable';
+}
+
 /* ========================================
    BASE STYLES
    ======================================== */
 
 body {
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-montserrat), Arial, sans-serif;
     background-color: var(--bg-primary);
     position: relative;
     min-height: 100vh;
@@ -51,7 +54,7 @@ h1,
 h2,
 .text-xl,
 .text-lg {
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-montserrat), Arial, sans-serif;
 }
 
 /* ========================================

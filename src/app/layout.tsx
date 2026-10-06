@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import Image from 'next/image';
+import '@fontsource-variable/montserrat';
 import './globals.css';
 import PwaSetup from '@/components/PwaSetup';
 
@@ -30,7 +30,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body className="antialiased min-h-screen flex flex-col font-['Montserrat',sans-serif]" suppressHydrationWarning>
+      <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         {/* Martial Arts Theme Background */}
         <div className="fixed inset-0 z-[-1] pointer-events-none bg-[#0a0f1c]">
           <div className="absolute inset-0 bg-gradient-to-b from-[#0a0f1c]/30 via-[#0a0f1c]/50 to-[#0a0f1c]/90 pointer-events-none" />

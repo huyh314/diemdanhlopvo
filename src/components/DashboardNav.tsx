@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ThemeSwitcher from './ThemeSwitcher';
-import AddStudentModal from './AddStudentModal';
 import { Button } from './ui';
 
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+
+const AddStudentModal = dynamic(() => import('./AddStudentModal'), {
+    loading: () => <div role="status" className="fixed bottom-24 left-1/2 z-50 -translate-x-1/2 rounded-xl bg-[var(--bg-card)] p-4 shadow-xl">Đang mở biểu mẫu…</div>,
+});
 
 // =============================================
 // DASHBOARD NAV — Client Component for interactivity
@@ -23,7 +27,20 @@ const NAV_ITEMS = [
 export default function DashboardNav() {
     const pathname = usePathname();
     const [showAddModal, setShowAddModal] = useState(false);
+    const [warmTabs, setWarmTabs] = useState(false);
     const { playClick } = useSoundEffects();
+
+    useEffect(() => {
+        let timer: ReturnType<typeof setTimeout>;
+        // Let the opening screen finish before fetching all other tabs.
+        const warm = () => { timer = setTimeout(() => setWarmTabs(true), 1500); };
+        if (document.readyState === 'complete') warm();
+        else window.addEventListener('load', warm, { once: true });
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('load', warm);
+        };
+    }, []);
 
     return (
         <>
@@ -54,7 +71,7 @@ export default function DashboardNav() {
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        prefetch={true}
+                                        prefetch={warmTabs}
                                         onClick={playClick}
                                         className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${isActive
                                             ? 'bg-[rgba(var(--accent-rgb-from),0.2)] text-[var(--accent-from)] border border-[rgba(var(--accent-rgb-from),0.3)]'
@@ -105,7 +122,7 @@ export default function DashboardNav() {
                     {/* Left 2: Điểm Danh + Xếp Hạng */}
                     <Link
                         href={NAV_ITEMS[0].href}
-                        prefetch={true}
+                        prefetch={warmTabs}
                         onClick={playClick}
                         className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[0].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                     >
@@ -115,7 +132,7 @@ export default function DashboardNav() {
 
                     <Link
                         href={NAV_ITEMS[1].href}
-                        prefetch={true}
+                        prefetch={warmTabs}
                         onClick={playClick}
                         className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[1].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                     >
@@ -139,7 +156,7 @@ export default function DashboardNav() {
                     {/* Right 2: Giáo Án + Học Sinh */}
                     <Link
                         href={NAV_ITEMS[2].href}
-                        prefetch={true}
+                        prefetch={warmTabs}
                         onClick={playClick}
                         className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[2].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                     >
@@ -149,7 +166,7 @@ export default function DashboardNav() {
 
                     <Link
                         href={NAV_ITEMS[3].href}
-                        prefetch={true}
+                        prefetch={warmTabs}
                         onClick={playClick}
                         className={`flex flex-col items-center justify-center gap-1.5 transition-all flex-1 ${pathname.startsWith(NAV_ITEMS[3].href) ? 'text-[var(--accent-from)] -translate-y-1' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'}`}
                     >

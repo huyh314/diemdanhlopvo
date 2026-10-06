@@ -9,6 +9,10 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    // Netlify can handle old installed apps opening / before starting Next.js.
+    return [{ source: '/', destination: '/students', permanent: false }];
+  },
   experimental: {
     serverActions: {
       // Leave headroom for multipart framing while staying under Netlify's request cap.
