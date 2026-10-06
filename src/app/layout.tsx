@@ -30,6 +30,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi" suppressHydrationWarning>
+      <head>
+        {process.env.NEXT_PUBLIC_SUPABASE_URL && (
+          <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL} crossOrigin="anonymous" />
+        )}
+      </head>
       <body className="antialiased min-h-screen flex flex-col" suppressHydrationWarning>
         {/* Martial Arts Theme Background */}
         <div className="fixed inset-0 z-[-1] pointer-events-none bg-[#0a0f1c]">

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { GROUPS } from '@/lib/constants';
 import { STUDENTS_CHANGED_EVENT } from '@/lib/students-events';
 import type { StudentRow } from '@/types/database.types';
+import { createClient } from '@/utils/supabase/client';
 import StudentsList from './StudentsList';
 import StudentsLoading from './loading';
 
@@ -25,7 +26,6 @@ export default function StudentsLoader() {
             setPending(true);
             try {
                 // Keep the entry page static and read fresh data under the existing RLS policies.
-                const { createClient } = await import('@/utils/supabase/client');
                 if (disposed || activeRequest !== request) return;
                 const { data, error: queryError } = await createClient().from('students')
                     .select('*').eq('is_active', true).order('name', { ascending: true })
