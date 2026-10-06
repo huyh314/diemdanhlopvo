@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 import { updateStudent, deleteStudent } from '@/lib/dal';
 import { GroupId } from '@/types/database.types';
-import { createClient } from '@/utils/supabase/server';
 
 export async function updateStudentAction(id: string, formData: FormData) {
     try {
@@ -47,55 +46,5 @@ export async function deleteStudentAction(id: string) {
     } catch (e) {
         console.error('Lỗi khi xóa học sinh:', e);
         return { error: e instanceof Error ? e.message : 'Có lỗi xảy ra khi xóa' };
-    }
-}
-
-export async function uploadAvatarAction(id: string, formData: FormData) {
-    try {
-        const file = formData.get('avatar') as File | null;
-        if (!file || file.size === 0) return { error: 'Vui lòng chọn một tệp ảnh hợp lệ' };
-
-        if (file.size > 4 * 1024 * 1024) {
-            return { error: 'Kích thước ảnh vượt quá 4MB. Vui lòng chọn ảnh nhỏ hơn 4MB.' };
-        }
-
-        const supabase = await createClient();
-        const extensions: Record<string, string> = {
-            'image/jpeg': 'jpg',
-            'image/png': 'png',
-            'image/webp': 'webp',
-            'image/gif': 'gif',
-        };
-        const ext = extensions[file.type];
-        if (!ext) return { error: 'Chỉ hỗ trợ ảnh JPG, PNG, WebP hoặc GIF.' };
-        const fileName = `${id}-${Date.now()}.${ext}`;
-
-        const { data, error } = await supabase.storage
-            .from('avatars')
-            .upload(fileName, file, {
-                cacheControl: '3600',
-                upsert: false // Prevent accidentally overwriting a totally different file if names collide
-            });
-
-        if (error) {
-            console.error('Lỗi upload Storage:', error);
-            return { error: 'Lỗi tải ảnh lên: ' + error.message };
-        }
-
-        const avatarUrl = `/api/media?bucket=avatars&path=${encodeURIComponent(fileName)}`;
-
-        // Ảnh đi qua endpoint media để bucket vẫn có thể đặt ở chế độ riêng tư.
-        await updateStudent(id, { avatar_url: avatarUrl });
-
-        // Yêu cầu Next.js xóa cache và tải lại dữ liệu mới nhất
-        revalidatePath(`/students/${id}`);
-        revalidatePath('/students');
-        revalidatePath('/');
-        revalidatePath('/rankings/batch-grade');
-
-        return { success: true, url: avatarUrl };
-    } catch (e) {
-        console.error('Lỗi khi cập nhật ảnh đại diện:', e);
-        return { error: e instanceof Error ? e.message : 'Có lỗi hệ thống xảy ra khi tải ảnh' };
     }
 }

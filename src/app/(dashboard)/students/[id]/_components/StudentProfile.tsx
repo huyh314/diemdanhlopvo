@@ -2,38 +2,19 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { updateStudentAction, deleteStudentAction, uploadAvatarAction } from '../actions';
+import { updateStudentAction, deleteStudentAction } from '../actions';
 import { GROUPS, getGroupName } from '@/lib/constants';
 import { useToast } from '@/components/Toast';
 import { StudentRow } from '@/types/database.types';
-import { mediaAccessUrl } from '@/lib/media-url';
+import StudentAvatar from '@/components/StudentAvatar';
 
 export default function StudentProfile({ student }: { student: StudentRow }) {
     const [isEditing, setIsEditing] = useState(false);
     const [isPending, startTransition] = useTransition();
-    const [isUploading, startUpload] = useTransition();
     const { toast } = useToast();
     const router = useRouter();
 
     const groupLabel = getGroupName(student.group_id);
-
-    async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        const formData = new FormData();
-        formData.append('avatar', file);
-
-        startUpload(async () => {
-            const result = await uploadAvatarAction(student.id, formData);
-            if (result?.error) {
-                toast(result.error, 'error');
-            } else {
-                toast('Đã cập nhật ảnh đại diện', 'success');
-            }
-            e.target.value = '';
-        });
-    }
 
     async function handleSave(formData: FormData) {
         startTransition(async () => {
@@ -157,36 +138,10 @@ export default function StudentProfile({ student }: { student: StudentRow }) {
             >
                 <span className="text-xs font-bold uppercase tracking-wider">Sửa</span> ✏️
             </button>
-            <div className="flex items-center gap-5">
-                <label className="relative block w-20 h-20 rounded-full cursor-pointer group shrink-0">
-                    <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isUploading} />
-                    <div className="w-full h-full rounded-full bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-2xl font-bold text-white overflow-hidden shadow-lg border-2 border-transparent group-hover:border-[var(--accent-from)] transition-all">
-                        {student.avatar_url ? (
-                            <img
-                                src={mediaAccessUrl(student.avatar_url)}
-                                alt={student.name}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            student.name
-                                .split(' ')
-                                .map((w) => w[0])
-                                .slice(-2)
-                                .join('')
-                                .toUpperCase()
-                        )}
-                    </div>
-                    {/* Hover Overlay */}
-                    <div className={`absolute inset-0 bg-black/50 rounded-full flex flex-col items-center justify-center transition-opacity ${isUploading ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                        {isUploading ? (
-                            <span className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
-                        ) : (
-                            <span className="text-[10px] uppercase font-bold text-center tracking-wider text-white">Đổi Ảnh</span>
-                        )}
-                    </div>
-                </label>
-                <div>
-                    <h2 className="text-2xl font-bold pr-16">{student.name}</h2>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5 pt-8 sm:pt-0">
+                <StudentAvatar studentId={student.id} name={student.name} avatarUrl={student.avatar_url} size="profile" />
+                <div className="min-w-0 flex-1">
+                    <h2 className="break-words text-2xl font-bold sm:pr-16">{student.name}</h2>
                     <div className="flex flex-wrap items-center gap-3 mt-2 text-sm text-gray-400">
                         <span className="px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/30 text-xs font-bold whitespace-nowrap">
                             {groupLabel}
