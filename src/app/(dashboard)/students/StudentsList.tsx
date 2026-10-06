@@ -186,8 +186,8 @@ export default function StudentsList({ groups, total }: { groups: StudentGroup[]
                                                 )}
                                             </div>
                                             <div className="min-w-0 flex-1">
-                                                <h4 className="truncate font-semibold">{student.name}</h4>
-                                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                                <h4 className="whitespace-normal break-words font-semibold leading-snug">{student.name}</h4>
+                                                <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                                                     {student.birth_year && <span>({student.birth_year})</span>}
                                                     {student.phone && <span>📱 {student.phone}</span>}
                                                 </div>
