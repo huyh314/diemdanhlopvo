@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/client';
 import { AVATAR_MAX_INPUT_BYTES, AVATAR_MAX_UPLOAD_BYTES } from './avatar';
 import { prepareAvatarUploadAction, completeAvatarUploadAction } from './avatar.actions';
+import { notifyStudentsChanged } from './students-events';
 
 /** Decode on the device and upload a small, static JPEG instead of a full camera photo. */
 export async function prepareAvatarImage(file: File): Promise<File> {
@@ -48,5 +49,6 @@ export async function uploadStudentAvatar(id: string, file: File): Promise<strin
 
     const saved = await completeAvatarUploadAction(id, ticket.path);
     if (!saved.success) throw new Error(saved.error);
+    notifyStudentsChanged();
     return saved.url;
 }

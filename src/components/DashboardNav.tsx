@@ -28,9 +28,13 @@ export default function DashboardNav() {
     const pathname = usePathname();
     const [showAddModal, setShowAddModal] = useState(false);
     const [warmTabs, setWarmTabs] = useState(false);
+    const [todayLabel, setTodayLabel] = useState('');
     const { playClick } = useSoundEffects();
 
     useEffect(() => {
+        setTodayLabel(new Date().toLocaleDateString('vi-VN', {
+            weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric', timeZone: 'Asia/Ho_Chi_Minh',
+        }));
         let timer: ReturnType<typeof setTimeout>;
         // Let the opening screen finish before fetching all other tabs.
         const warm = () => { timer = setTimeout(() => setWarmTabs(true), 1500); };
@@ -52,12 +56,7 @@ export default function DashboardNav() {
                             Võ Đường Phan Phu Tiên
                         </h1>
                         <p className="text-xs text-[var(--text-tertiary)] font-mono">
-                            {new Date().toLocaleDateString('vi-VN', {
-                                weekday: 'long',
-                                day: 'numeric',
-                                month: 'numeric',
-                                year: 'numeric',
-                            })}
+                            {todayLabel || '\u00a0'}
                         </p>
                     </div>
 

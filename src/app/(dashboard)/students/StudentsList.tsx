@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { mediaAccessUrl } from '@/lib/media-url';
 import type { StudentRow } from '@/types/database.types';
 import { bulkDeleteStudentsAction } from './actions';
+import { notifyStudentsChanged } from '@/lib/students-events';
 
 type StudentGroup = {
     id: string;
@@ -66,6 +67,7 @@ export default function StudentsList({ groups, total }: { groups: StudentGroup[]
             }
 
             setSelectedIds(new Set());
+            notifyStudentsChanged();
             setMessage(
                 result.deleted === ids.length
                     ? `Đã xóa ${result.deleted} học sinh khỏi danh sách.`
