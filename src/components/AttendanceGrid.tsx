@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useTransition, useMemo, useRef, useEffect } from 'react';
+import { useState, useTransition, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
-import { useGSAP } from '@gsap/react';
 import { useToast } from './Toast';
 import { saveAttendanceAction } from '@/lib/actions';
-import { mediaAccessUrl } from '@/lib/media-url';
+import StudentAvatar from './StudentAvatar';
 import { enqueueSyncAction } from '@/lib/offline-db';
 import type { StudentRow, AttendanceStatus, GroupId } from '@/types/database.types';
 import { Button, Badge } from './ui';
@@ -98,7 +97,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
     // ... (rest of the state and computations)
     const [search, setSearch] = useState('');
     const [isPending, startTransition] = useTransition();
-    const gridRef = useRef<HTMLDivElement>(null);
     const { toast } = useToast();
 
     // Tính toán hasChanges tự động dựa trên so sánh statuses và initialStatuses
@@ -126,24 +124,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
         const q = search.toLowerCase();
         return initialStudents.filter((s) => s.name.toLowerCase().includes(q));
     }, [initialStudents, search]);
-
-    // GSAP Stagger Animation
-    useGSAP(() => {
-        if (!gridRef.current) return;
-
-        // Reset opacity before animating
-        gsap.set('.student-card', { opacity: 0, y: 40, rotationX: 15 });
-
-        gsap.to('.student-card', {
-            opacity: 1,
-            y: 0,
-            rotationX: 0,
-            duration: 0.6,
-            stagger: 0.05,
-            ease: 'power3.out',
-            clearProps: 'transform' // clean up after animation to allow hover effects
-        });
-    }, [filtered]);
 
     // Stats
     const stats = useMemo(() => {
@@ -213,33 +193,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
                 toast(`Đã lưu điểm danh: ${stats.present} có mặt / ${stats.total} học sinh`, 'success');
             }
         });
-    }
-
-    // Initials
-    function getInitials(name: string) {
-        return name
-            .split(' ')
-            .map((w) => w[0])
-            .slice(-2)
-            .join('')
-            .toUpperCase();
-    }
-
-    // Avatar gradient
-    function getGradient(name: string) {
-        const gradients = [
-            'from-sky-400 to-blue-600',
-            'from-purple-400 to-pink-600',
-            'from-emerald-400 to-teal-600',
-            'from-orange-400 to-red-600',
-            'from-indigo-400 to-violet-600',
-            'from-rose-400 to-pink-600',
-            'from-cyan-400 to-blue-600',
-            'from-amber-400 to-orange-600',
-        ];
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        return gradients[Math.abs(hash) % gradients.length];
     }
 
     return (
@@ -317,7 +270,6 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
 
             {/* Grid with 3D Perspective */}
             <div
-                ref={gridRef}
                 className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 perspective-[1000px]"
             >
                 {filtered.map((student) => {
@@ -325,12 +277,10 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
                     const config = STATUS_CONFIG[status];
 
                     return (
-                        <button
+                        <div
                             key={student.id}
                             id={`card-${student.id}`}
-                            onClick={() => toggleStatus(student.id)}
-                            aria-pressed={status !== 'absent'}
-                            className={`student-card relative rounded-[20px] p-4 text-center cursor-pointer group transform-gpu transition-all duration-300
+                            className={`student-card relative flex min-w-0 flex-col rounded-[20px] p-3 sm:p-4 text-center group transform-gpu transition-all duration-300
                                 ${config.cardClass}
                             `}
                         >
@@ -344,33 +294,25 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
                                 </div>
                             )}
 
-                            {/* Avatar with Animated Ring */}
-                            <div className="relative w-14 h-14 mx-auto mb-3">
-                                {status === 'present' && (
-                                    <div className="absolute inset-[-4px] rounded-full border-2 border-emerald-400 opacity-50 animate-[spin_4s_linear_infinite]" />
+                            <StudentAvatar studentId={student.id} name={student.name} avatarUrl={student.avatar_url} />
+
+                            <button type="button" onClick={() => toggleStatus(student.id)}
+                                aria-pressed={status !== 'absent'}
+                                aria-label={`Điểm danh ${student.name}: ${config.label}`}
+                                className="mt-1 flex min-h-20 w-full min-w-0 flex-1 flex-col items-center rounded-lg py-2 focus-visible:outline-2 focus-visible:outline-[var(--accent-from)]">
+                                <h3 className="w-full whitespace-normal break-words text-sm font-semibold leading-snug text-[var(--text-primary)] group-hover:text-white transition-colors">{student.name}</h3>
+                                {student.birth_year && (
+                                    <p className="text-[10px] text-[var(--text-tertiary)]">({student.birth_year})</p>
                                 )}
-                                <div className={`w-full h-full rounded-full bg-gradient-to-br ${getGradient(student.name)} flex items-center justify-center text-lg font-bold text-white shadow-xl ring-2 ${status === 'present' ? 'ring-emerald-400/30' : 'ring-white/5'}`}>
-                                    {student.avatar_url ? (
-                                        <img src={mediaAccessUrl(student.avatar_url)} alt={student.name} className="w-full h-full object-cover rounded-full" />
-                                    ) : (
-                                        getInitials(student.name)
-                                    )}
+
+                                {/* Status label badge */}
+                                <div className="mt-2">
+                                    <Badge variant={config.badgeVariant} className="text-[10px] !px-2 !py-0.5 shadow-sm">
+                                        {config.label}
+                                    </Badge>
                                 </div>
-                            </div>
-
-                            {/* Name */}
-                            <h3 className="text-sm font-semibold truncate text-[var(--text-primary)] group-hover:text-white transition-colors">{student.name}</h3>
-                            {student.birth_year && (
-                                <p className="text-[10px] text-[var(--text-tertiary)]">({student.birth_year})</p>
-                            )}
-
-                            {/* Status label badge */}
-                            <div className="mt-2">
-                                <Badge variant={config.badgeVariant} className="text-[10px] !px-2 !py-0.5 shadow-sm">
-                                    {config.label}
-                                </Badge>
-                            </div>
-                        </button>
+                            </button>
+                        </div>
                     );
                 })}
             </div>

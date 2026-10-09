@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { AVATAR_PATH_PATTERN } from '@/lib/avatar';
 
 const BUCKETS = new Set(['lesson-attachments', 'avatars']);
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-const AVATAR_PATH_PATTERN = /^[0-9a-f-]{36}-\d+\.[a-z0-9]{1,10}$/i;
 
 export async function GET(request: NextRequest) {
     const supabase = await createClient();
@@ -28,7 +28,9 @@ export async function GET(request: NextRequest) {
     }
 
     const response = NextResponse.redirect(data.signedUrl);
-    response.headers.set('Cache-Control', 'private, no-store');
+    // Avatar filenames change with each upload. Reuse the redirect briefly on this
+    // device; the five-minute cache expires well before the one-hour signed URL.
+    response.headers.set('Cache-Control', bucket === 'avatars' ? 'private, max-age=300' : 'private, no-store');
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     return response;
 }

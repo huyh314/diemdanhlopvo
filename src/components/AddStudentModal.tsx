@@ -6,6 +6,7 @@ import { createStudentAction } from '@/lib/actions';
 import type { GroupId } from '@/types/database.types';
 import { GROUPS, GROUP_IDS } from '@/lib/constants';
 import { Modal, Button, InputField, SelectField } from './ui';
+import { notifyStudentsChanged } from '@/lib/students-events';
 
 // =============================================
 // ADD STUDENT MODAL
@@ -60,6 +61,7 @@ export default function AddStudentModal({ onClose, defaultGroup = GROUP_IDS[0] }
             if (!result.success) {
                 toast(result.error || 'Lỗi khi thêm học sinh', 'error');
             } else {
+                notifyStudentsChanged();
                 toast(`Đã thêm: ${name}`, 'success');
                 onClose();
             }
