@@ -5,9 +5,11 @@ import AttendanceGrid from '@/components/AttendanceGrid';
 export default async function AttendanceContent({
     groupId,
     selectedDate,
+    isHistory,
 }: {
     groupId: GroupId;
     selectedDate: string;
+    isHistory: boolean;
 }) {
     // Lấy danh sách học sinh và trạng thái điểm danh ngày đã chọn song song
     const [students, todayMap] = await Promise.all([
@@ -28,6 +30,7 @@ export default async function AttendanceContent({
             initialStatuses={initialStatuses}
             groupId={groupId}
             sessionDate={selectedDate}
+            isHistory={isHistory}
         />
     );
 }

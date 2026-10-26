@@ -11,6 +11,7 @@ import type { StudentRow, AttendanceStatus, GroupId } from '@/types/database.typ
 import { Button, Badge } from './ui';
 
 import { useSoundEffects } from '@/hooks/useSoundEffects';
+import { ATTENDANCE_DAY_CHECK_EVENT, getVietnamDate } from '@/lib/attendance-date';
 
 // =============================================
 // ATTENDANCE GRID — Interactive Client Component
@@ -22,6 +23,7 @@ interface AttendanceGridProps {
     initialStatuses?: Record<string, AttendanceStatus>;
     groupId: GroupId;
     sessionDate: string; // YYYY-MM-DD
+    isHistory?: boolean;
 }
 
 const STATUS_CYCLE: AttendanceStatus[] = ['absent', 'present', 'excused'];
@@ -47,7 +49,7 @@ const STATUS_CONFIG: Record<AttendanceStatus, { label: string; icon: string; car
     },
 };
 
-export default function AttendanceGrid({ initialStudents, initialStatuses, groupId, sessionDate }: AttendanceGridProps) {
+export default function AttendanceGrid({ initialStudents, initialStatuses, groupId, sessionDate, isHistory = false }: AttendanceGridProps) {
     // Key unique cho mỗi nhóm + ngày để không trộn lẫn dữ liệu
     const DRAFT_KEY = `attendance_draft_${groupId}_${sessionDate}`;
 
@@ -139,7 +141,15 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
     const attendanceRate = stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0;
 
     // Toggle status
+    function canEditSession() {
+        if (isHistory || sessionDate === getVietnamDate()) return true;
+        toast('Đã sang ngày mới. Đang chuyển sang điểm danh hôm nay.', 'info');
+        window.dispatchEvent(new Event(ATTENDANCE_DAY_CHECK_EVENT));
+        return false;
+    }
+
     function toggleStatus(studentId: string) {
+        if (!canEditSession()) return;
         // Play click sound
         playClick();
 
@@ -159,6 +169,7 @@ export default function AttendanceGrid({ initialStudents, initialStatuses, group
 
     // Save all
     function handleSave() {
+        if (!canEditSession()) return;
         startTransition(async () => {
             const records = Object.entries(statuses).map(([studentId, status]) => ({
                 studentId,
