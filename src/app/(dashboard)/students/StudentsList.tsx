@@ -128,7 +128,7 @@ export default function StudentsList({ groups, total, readOnly = false }: { grou
             </div>
 
             {groups.map((group) => {
-                const groupSelected = group.students.every((student) => selectedIds.has(student.id));
+                const groupSelected = group.students.length > 0 && group.students.every((student) => selectedIds.has(student.id));
                 const groupPartiallySelected = group.students.some((student) => selectedIds.has(student.id));
 
                 return (
@@ -141,7 +141,7 @@ export default function StudentsList({ groups, total, readOnly = false }: { grou
                                     if (element) element.indeterminate = !groupSelected && groupPartiallySelected;
                                 }}
                                 onChange={() => toggleGroup(group)}
-                                disabled={isPending || readOnly}
+                                disabled={isPending || readOnly || group.students.length === 0}
                                 className="h-4 w-4 accent-cyan-400"
                                 aria-label={`Chọn tất cả học sinh nhóm ${group.name}`}
                             />
@@ -149,6 +149,7 @@ export default function StudentsList({ groups, total, readOnly = false }: { grou
                                 {group.name} ({group.students.length})
                             </h3>
                         </div>
+                        {group.students.length === 0 && <p className="mb-3 text-sm text-[var(--text-secondary)]">Chưa có học sinh. Nhấn + để thêm học sinh vào nhóm này.</p>}
                         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
                             {group.students.map((student) => {
                                 const isSelected = selectedIds.has(student.id);

@@ -4,7 +4,6 @@
 
 import { notFound } from 'next/navigation';
 import { getStudent, getAttendanceStats, getScores } from '@/lib/dal';
-import { getGroupName } from '@/lib/constants';
 import StudentProfile from './_components/StudentProfile';
 
 export async function generateMetadata({

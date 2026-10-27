@@ -1,5 +1,5 @@
 import type { StudentRow } from '@/types/database.types';
-import { GROUP_IDS } from './constants';
+import { GroupIdSchema } from '@/types/validation';
 
 const KEY = 'vo-duong:students-preview:v1';
 const MAX_AGE_MS = 24 * 60 * 60 * 1000;
@@ -14,7 +14,7 @@ export function readStudentsSnapshot(): StudentRow[] | null {
         if (!Number.isFinite(age) || age < 0 || age > MAX_AGE_MS || !Array.isArray(snapshot.students)) return null;
         if (!snapshot.students.every((student: StudentRow) => student &&
             typeof student.id === 'string' && /^[0-9a-f-]{36}$/i.test(student.id) &&
-            typeof student.name === 'string' && GROUP_IDS.includes(student.group_id) &&
+            typeof student.name === 'string' && GroupIdSchema.safeParse(student.group_id).success &&
             typeof student.birth_year === 'string' && typeof student.phone === 'string' &&
             typeof student.avatar_url === 'string' && student.is_active === true)) return null;
         return snapshot.students;

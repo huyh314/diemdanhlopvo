@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { GROUPS } from '@/lib/constants';
+import { useGroups } from '@/components/GroupsProvider';
+import AddGroupButton from '@/components/AddGroupButton';
 import { STUDENTS_CHANGED_EVENT } from '@/lib/students-events';
 import type { StudentRow } from '@/types/database.types';
 import { createClient } from '@/utils/supabase/client';
@@ -10,6 +11,7 @@ import StudentsList from './StudentsList';
 import StudentsLoading from './loading';
 
 export default function StudentsLoader() {
+    const { groups: groupDefinitions } = useGroups();
     const [students, setStudents] = useState<StudentRow[] | null>(null);
     const [error, setError] = useState('');
     const [pending, setPending] = useState(true);
@@ -72,14 +74,18 @@ export default function StudentsLoader() {
         };
     }, [revision]);
 
-    const groups = GROUPS.map(group => ({
+    const knownIds = new Set(groupDefinitions.map(group => group.id));
+    const missingGroups = [...new Set((students ?? []).map(student => student.group_id))]
+        .filter(id => !knownIds.has(id)).map(id => ({ id, name: id, shortName: id }));
+    const groups = [...groupDefinitions, ...missingGroups].map(group => ({
         ...group,
         students: (students ?? []).filter(student => student.group_id === group.id),
-    })).filter(group => group.students.length > 0);
+    }));
 
     return (
         <div className="space-y-3" data-students-ready={students !== null}>
             <div className="flex flex-wrap items-center justify-end gap-2 text-sm">
+                <AddGroupButton />
                 {showingSnapshot && <p role="status" className="mr-auto text-[var(--text-secondary)]">Danh sách từ lần mở trước{pending ? ' — đang cập nhật…' : ''}</p>}
                 {error && <p role="alert" className="mr-auto text-amber-400">{error}{students !== null ? ' Đang hiển thị danh sách đã tải trước đó.' : ''}</p>}
                 <button type="button" onClick={() => setRevision(value => value + 1)} disabled={pending}

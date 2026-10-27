@@ -4,7 +4,8 @@ import { useState, useTransition } from 'react';
 import { useToast } from './Toast';
 import { createStudentAction } from '@/lib/actions';
 import type { GroupId } from '@/types/database.types';
-import { GROUPS, GROUP_IDS } from '@/lib/constants';
+import { GROUP_IDS } from '@/lib/constants';
+import { useGroups } from '@/components/GroupsProvider';
 import { Modal, Button, InputField, SelectField } from './ui';
 import { notifyStudentsChanged } from '@/lib/students-events';
 
@@ -29,6 +30,7 @@ const DAYS = [
 export default function AddStudentModal({ onClose, defaultGroup = GROUP_IDS[0] }: AddStudentModalProps) {
     const [name, setName] = useState('');
     const [groupId, setGroupId] = useState<GroupId>(defaultGroup);
+    const { groups } = useGroups();
     const [birthYear, setBirthYear] = useState('');
     const [phone, setPhone] = useState('');
     const [schedule, setSchedule] = useState<number[]>([]);
@@ -107,7 +109,7 @@ export default function AddStudentModal({ onClose, defaultGroup = GROUP_IDS[0] }
                     value={groupId}
                     onChange={(e) => setGroupId(e.target.value as GroupId)}
                 >
-                    {GROUPS.map(g => (
+                    {groups.map(g => (
                         <option key={g.id} value={g.id}>{g.name}</option>
                     ))}
                 </SelectField>

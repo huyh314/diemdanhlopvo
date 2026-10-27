@@ -4,6 +4,7 @@
 
 import { ToastProvider } from '@/components/Toast';
 import DashboardNav from '@/components/DashboardNav';
+import { GroupsProvider } from '@/components/GroupsProvider';
 
 export default async function DashboardLayout({
     children,
@@ -12,6 +13,7 @@ export default async function DashboardLayout({
 }) {
     return (
         <ToastProvider>
+            <GroupsProvider>
             <div className="min-h-screen bg-transparent text-[var(--text-primary)]">
 
 
@@ -23,6 +25,7 @@ export default async function DashboardLayout({
                     {children}
                 </main>
             </div>
+            </GroupsProvider>
         </ToastProvider>
     );
 }

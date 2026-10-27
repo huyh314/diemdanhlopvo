@@ -21,6 +21,7 @@ import type {
 } from '@/types/database.types';
 import type { AttendanceBulkInput } from '@/types/domain';
 import { GROUP_IDS } from '@/lib/constants';
+import { getGroups } from '@/lib/groups';
 
 // =============================================
 // STUDENTS
@@ -258,15 +259,20 @@ export async function getGroupSummary(date?: string) {
     const supabase = await createClient();
     const targetDate = date ?? new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
 
-    const [{ data: students, error: stuErr }, { data: attendance, error: attErr }] = await Promise.all([
+    const [{ data: students, error: stuErr }, { data: attendance, error: attErr }, groups] = await Promise.all([
         supabase.from('students').select('id, group_id').eq('is_active', true),
-        supabase.from('attendance').select('student_id, status, sessions!inner(session_date)').eq('sessions.session_date', targetDate)
+        supabase.from('attendance').select('student_id, status, sessions!inner(session_date)').eq('sessions.session_date', targetDate),
+        getGroups(),
     ]);
 
     if (stuErr) throw new Error(`Failed to fetch students: ${stuErr.message}`);
     if (attErr) throw new Error(`Failed to fetch attendance: ${attErr.message}`);
 
     const summaryMap = new Map<string, GroupAttendanceSummaryRow>();
+    groups.forEach(group => summaryMap.set(group.id, {
+        group_id: group.id, total_students: 0, present_count: 0,
+        absent_count: 0, excused_count: 0, rate: 0,
+    }));
 
     // Register active students to groups
     (students || []).forEach(s => {

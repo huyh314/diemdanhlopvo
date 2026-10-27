@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getMonthlyExportData } from '@/lib/dal';
 import * as XLSX from 'xlsx';
 import { getGroupShortName } from '@/lib/constants';
+import { getGroups } from '@/lib/groups';
 
 export async function GET(request: Request) {
     try {
@@ -14,7 +15,7 @@ export async function GET(request: Request) {
         const month = monthParam ? parseInt(monthParam) : now.getMonth() + 1;
         const year = yearParam ? parseInt(yearParam) : now.getFullYear();
 
-        const rawData = await getMonthlyExportData(year, month);
+        const [rawData, groups] = await Promise.all([getMonthlyExportData(year, month), getGroups()]);
 
         if (!rawData || rawData.length === 0) {
             return NextResponse.json({ error: 'Không có dữ liệu điểm danh trong tháng này.' }, { status: 404 });
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
             if (!studentMap.has(key)) {
                 studentMap.set(key, {
                     'Họ Tên': studentName,
-                    'Nhóm': getGroupShortName(groupId),
+                    'Nhóm': getGroupShortName(groupId, groups),
                     'Tổng CM': 0,
                     'Tổng Vắng': 0,
                     'Tổng Phép': 0

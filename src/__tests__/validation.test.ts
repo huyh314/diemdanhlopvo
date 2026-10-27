@@ -25,7 +25,7 @@ describe('GroupIdSchema', () => {
     });
 
     it('rejects invalid group IDs', () => {
-        expect(GroupIdSchema.safeParse('nhom_4').success).toBe(false);
+        expect(GroupIdSchema.safeParse('not-a-group').success).toBe(false);
         expect(GroupIdSchema.safeParse('').success).toBe(false);
         expect(GroupIdSchema.safeParse(123).success).toBe(false);
     });
@@ -113,7 +113,7 @@ describe('StudentFormSchema', () => {
     it('rejects invalid group ID', () => {
         const result = StudentFormSchema.safeParse({
             ...validStudent,
-            groupId: 'nhom_99',
+            groupId: 'invalid group',
         });
         expect(result.success).toBe(false);
     });

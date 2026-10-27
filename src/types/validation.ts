@@ -10,7 +10,12 @@ import { GROUP_IDS } from '@/lib/constants';
 // Enums
 // =============================================
 
-export const GroupIdSchema = z.enum(GROUP_IDS as [string, ...string[]]);
+// Existence is enforced by foreign keys; this validates the identifier's shape.
+export const GroupIdSchema = z.string().regex(/^(nhom_[1-9]\d*|group_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/, 'Nhóm không hợp lệ');
+export const CreateGroupSchema = z.object({
+    name: z.string().trim().min(1, 'Nhập tên nhóm').max(80, 'Tên nhóm tối đa 80 ký tự'),
+    shortName: z.string().trim().max(12, 'Tên viết tắt tối đa 12 ký tự').default(''),
+});
 export const AttendanceStatusSchema = z.enum(['present', 'absent', 'excused']);
 export const ScoreCategorySchema = z.enum(['chuyen_can', 'y_thuc', 'chuyen_mon']);
 
@@ -24,7 +29,7 @@ export const StudentFormSchema = z.object({
         .min(1, 'Tên không được để trống')
         .max(100, 'Tên quá dài')
         .trim(),
-    groupId: GroupIdSchema.default(GROUP_IDS[0] as any),
+    groupId: GroupIdSchema.default(GROUP_IDS[0]),
     birthYear: z.string().max(4).optional().default(''),
     phone: z.string().max(20).optional().default(''),
     avatarUrl: z.string().url('URL ảnh không hợp lệ').or(z.literal('')).optional().default(''),

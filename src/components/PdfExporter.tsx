@@ -5,7 +5,7 @@ import { useToast } from './Toast';
 import { StudentReportData, SemesterReportTemplate } from './pdf/SemesterReportTemplate';
 import { RankingTemplate } from './pdf/RankingTemplate';
 import ReportPreviewModal from './ReportPreviewModal';
-import { getGroupShortName } from '@/lib/constants';
+import { GroupLabel } from '@/components/GroupsProvider';
 
 interface PdfExporterProps {
     rankings: StudentReportData[];
@@ -199,7 +199,7 @@ function BxhPreviewTable({ rankings, weekKey }: { rankings: any[]; weekKey?: str
                                 <tr key={r.student_id} className={`border-b border-white/5 hover:bg-white/5 ${rank <= 3 ? 'bg-yellow-500/5' : ''}`}>
                                     <td className="px-4 py-2.5 text-center">{typeof medal === 'string' ? <span className="text-lg">{medal}</span> : <span className="text-sm text-gray-500">{medal}</span>}</td>
                                     <td className="px-4 py-2.5 font-semibold">{r.student_name}</td>
-                                    <td className="px-4 py-2.5 text-center text-xs text-[var(--text-muted)]">{getGroupShortName(r.group_id)}</td>
+                                    <td className="px-4 py-2.5 text-center text-xs text-[var(--text-muted)]"><GroupLabel id={r.group_id} short /></td>
                                     <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_chuyen_can}</td>
                                     <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_y_thuc}</td>
                                     <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_chuyen_mon}</td>
@@ -240,7 +240,7 @@ function PhieuPreviewTable({ rankings, weekKey }: { rankings: any[]; weekKey?: s
                         {rankings.map((r: any) => (
                             <tr key={r.student_id} className="border-b border-white/5 hover:bg-white/5">
                                 <td className="px-4 py-2.5 font-semibold">{r.student_name}</td>
-                                <td className="px-4 py-2.5 text-center text-xs text-[var(--text-muted)]">{getGroupShortName(r.group_id)}</td>
+                                <td className="px-4 py-2.5 text-center text-xs text-[var(--text-muted)]"><GroupLabel id={r.group_id} short /></td>
                                 <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_chuyen_can}</td>
                                 <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_y_thuc}</td>
                                 <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_chuyen_mon}</td>
