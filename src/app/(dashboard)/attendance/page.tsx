@@ -5,7 +5,8 @@
 import { Suspense } from 'react';
 import Link from 'next/link';
 import GroupSummaryContent from './_components/GroupSummaryContent';
-import { GROUP_IDS, getGroupName } from '@/lib/constants';
+import { getGroups } from '@/lib/groups';
+import AddGroupButton from '@/components/AddGroupButton';
 import AttendanceContent from './_components/AttendanceContent';
 import { GroupSummarySkeleton, AttendanceGridSkeleton } from './_components/Skeletons';
 import ExportButton from './_components/ExportButton';
@@ -25,7 +26,8 @@ export default async function AttendancePage({
     searchParams: Promise<{ group?: string; date?: string; mode?: string }>;
 }) {
     const params = await searchParams;
-    const groupId = GROUP_IDS.find(group => group === params.group) ?? GROUP_IDS[0];
+    const groups = await getGroups();
+    const groupId = groups.find(group => group.id === params.group)?.id ?? groups[0]?.id ?? 'nhom_1';
 
     const today = getVietnamDate();
     const { selectedDate, isHistory } = resolveAttendanceDate(params, today);
@@ -51,6 +53,7 @@ export default async function AttendancePage({
                     </div>
                     <div className="flex flex-wrap items-start gap-3">
                         <DateSelector selectedDate={selectedDate} isHistory={isHistory} />
+                        <AddGroupButton />
                         <DownloadStudentListButton />
                         <ExportButton />
                     </div>
@@ -62,8 +65,8 @@ export default async function AttendancePage({
                 </Suspense>
 
                 {/* Group Tabs */}
-                <div className="flex gap-2">
-                    {GROUP_IDS.map((g) => (
+                <div className="flex flex-wrap gap-2">
+                    {groups.map(({ id: g, name }) => (
                         <Link
                             key={g}
                             href={isHistory ? `/attendance?group=${g}&mode=history&date=${selectedDate}` : `/attendance?group=${g}`}
@@ -73,7 +76,7 @@ export default async function AttendancePage({
                                 : 'bg-[var(--bg-secondary)] text-[var(--text-muted)] border border-transparent hover:bg-white/5'
                                 }`}
                         >
-                            {getGroupName(g)}
+                            {name}
                         </Link>
                     ))}
                 </div>

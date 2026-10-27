@@ -1,7 +1,7 @@
 import { getStudentRankings, getAverageRankings } from '@/lib/dal';
 import PdfExporter from '@/components/PdfExporter';
 import ScoreButton from '@/components/ScoreButton';
-import { getGroupShortName } from '@/lib/constants';
+import { GroupLabel } from '@/components/GroupsProvider';
 import Link from 'next/link';
 
 export default async function RankingsContent({ week, mode = 'weekly', weeks = 4 }: { week?: string; mode?: string; weeks?: number }) {
@@ -157,7 +157,7 @@ export default async function RankingsContent({ week, mode = 'weekly', weeks = 4
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--status-present-bg)] text-[var(--status-present-text)] border border-[var(--status-present-border)]">
-                                                {getGroupShortName(r.group_id)}
+                                                <GroupLabel id={r.group_id} short />
                                             </span>
                                         </td>
                                         <td className="px-4 py-3 text-center font-mono text-[var(--text-muted)]">{cc}</td>

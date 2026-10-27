@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getStudents } from '@/lib/dal';
 import * as XLSX from 'xlsx';
 import { getGroupName } from '@/lib/constants';
+import { getGroups } from '@/lib/groups';
 
 export async function GET(request: Request) {
     try {
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
         const month = monthParam ? parseInt(monthParam) : now.getMonth() + 1;
         const year = yearParam ? parseInt(yearParam) : now.getFullYear();
 
-        const students = await getStudents();
+        const [students, groups] = await Promise.all([getStudents(), getGroups()]);
 
         if (!students || students.length === 0) {
             return NextResponse.json({ error: 'Không có học sinh nào.' }, { status: 404 });
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
         const daysInMonth = new Date(year, month, 0).getDate();
 
         for (const [groupId, groupStudents] of grouped) {
-            const groupName = getGroupName(groupId);
+            const groupName = getGroupName(groupId, groups);
             const headerRow: Record<string, string> = { 'STT': 'STT', 'Họ Tên': 'Họ Tên' };
             for (let d = 1; d <= daysInMonth; d++) {
                 const dateStr = `${String(d).padStart(2, '0')}/${String(month).padStart(2, '0')}`;
@@ -65,7 +66,14 @@ export async function GET(request: Request) {
             // Freeze top row + first 2 columns
             worksheet['!freeze'] = { xSplit: 2, ySplit: 1 };
 
-            XLSX.utils.book_append_sheet(workbook, worksheet, groupName);
+            const baseName = groupName.replace(/[\\/?*\[\]:'\u0000-\u001f]/g, ' ').trim() || 'Nhóm';
+            let sheetName = baseName.slice(0, 31);
+            let suffix = 1;
+            while (workbook.SheetNames.some(name => name.toLowerCase() === sheetName.toLowerCase())) {
+                const tail = ` (${suffix++})`;
+                sheetName = baseName.slice(0, 31 - tail.length) + tail;
+            }
+            XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
         }
 
         const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });

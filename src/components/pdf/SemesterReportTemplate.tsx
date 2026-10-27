@@ -1,5 +1,5 @@
 import React from 'react';
-import { getGroupName } from '@/lib/constants';
+import { useGroups } from '@/components/GroupsProvider';
 
 export interface StudentReportData {
     student_id: string;
@@ -21,6 +21,7 @@ interface SemesterReportTemplateProps {
 
 export const SemesterReportTemplate = React.forwardRef<HTMLDivElement, SemesterReportTemplateProps>(({ student, week }, ref) => {
 
+    const { getGroupName } = useGroups();
     // Generate comment based on total score
     const generateComment = (total: number) => {
         if (total >= 40) return 'Học sinh có thành tích thi đua vượt trội, thể hiện tinh thần chuyên cần, kỷ luật tốt và trình độ cao. Cần tiếp tục phát huy trong các kỳ đánh giá tiếp theo.';

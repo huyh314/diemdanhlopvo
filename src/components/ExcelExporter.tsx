@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useToast } from './Toast';
-import { getGroupName, getGroupShortName } from '@/lib/constants';
+import { useGroups } from '@/components/GroupsProvider';
 
 // =============================================
 // EXCEL EXPORTER — Client-side SheetJS
@@ -14,6 +14,7 @@ interface ExcelExporterProps {
 }
 
 export default function ExcelExporter({ students, groupSummary }: ExcelExporterProps) {
+    const { getGroupName, getGroupShortName } = useGroups();
     const [isExporting, setIsExporting] = useState(false);
     const { toast } = useToast();
 

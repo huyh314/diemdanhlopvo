@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { updateStudentAction, deleteStudentAction } from '../actions';
-import { GROUPS, getGroupName } from '@/lib/constants';
+import { useGroups } from '@/components/GroupsProvider';
 import { useToast } from '@/components/Toast';
 import { StudentRow } from '@/types/database.types';
 import StudentAvatar from '@/components/StudentAvatar';
@@ -15,6 +15,7 @@ export default function StudentProfile({ student }: { student: StudentRow }) {
     const { toast } = useToast();
     const router = useRouter();
 
+    const { groups, getGroupName } = useGroups();
     const groupLabel = getGroupName(student.group_id);
 
     async function handleSave(formData: FormData) {
@@ -73,7 +74,7 @@ export default function StudentProfile({ student }: { student: StudentRow }) {
                                 defaultValue={student.group_id}
                                 className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-white focus:border-[var(--accent-from)] focus:outline-none"
                             >
-                                {GROUPS.map(g => (
+                                {groups.map(g => (
                                     <option key={g.id} value={g.id} className="bg-gray-900">{g.name}</option>
                                 ))}
                             </select>

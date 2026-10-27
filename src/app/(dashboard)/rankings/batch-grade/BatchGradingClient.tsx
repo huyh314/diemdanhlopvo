@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
 import { saveBatchScoresAction, fetchAutoChuyenCanBatch } from './actions';
 import { StudentRow, ScoreCategory } from '@/types/database.types';
-import { getGroupShortName } from '@/lib/constants';
+import { GroupLabel } from '@/components/GroupsProvider';
 import { mediaAccessUrl } from '@/lib/media-url';
 
 interface ScoreCriteriaItem {
@@ -70,7 +70,7 @@ const MemoizedStudentRow = React.memo(({
                 <div>
                     <div className="font-semibold text-sm">{student.name}</div>
                     <div className="text-[10px] text-gray-400 font-mono mt-0.5 bg-black/30 px-1.5 py-0.5 rounded max-w-max">
-                        {getGroupShortName(student.group_id)}
+                        <GroupLabel id={student.group_id} short />
                     </div>
                 </div>
             </div>
