@@ -3,7 +3,7 @@
 import { useState, useTransition, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import type { LessonPlanRow, LessonPlanSection, GroupId } from '@/types/database.types';
-import { GROUPS, getGroupName } from '@/lib/constants';
+import { useGroups } from '@/components/GroupsProvider';
 import { deleteLessonPlanAction } from '@/lib/lesson-plan.actions';
 import LessonPlanModal from './LessonPlanModal';
 import { mediaAccessUrl } from '@/lib/media-url';
@@ -79,6 +79,7 @@ function PlanCard({
     onEdit: (plan: LessonPlanRow) => void;
     onDelete: (id: string) => void;
 }) {
+    const { getGroupName } = useGroups();
     const colorClass = GROUP_COLORS[plan.group_id] ?? 'from-white/10 to-white/5 border-white/20';
     const totalItems = plan.content.reduce((acc, s) => acc + s.items.length, 0);
 
@@ -241,6 +242,7 @@ export default function LessonPlanClient({ initialPlans, today, libraryTechnique
     const [showModal, setShowModal] = useState(false);
     const [editingPlan, setEditingPlan] = useState<LessonPlanRow | undefined>();
     const [defaultDate, setDefaultDate] = useState(today);
+    const { groups } = useGroups();
     const [filterGroup, setFilterGroup] = useState<GroupId | 'all'>('all');
 
     // ── Week Navigation ────────────────────────────────────────────
@@ -351,7 +353,7 @@ export default function LessonPlanClient({ initialPlans, today, libraryTechnique
                         >
                             Tất cả
                         </button>
-                        {GROUPS.map((g) => (
+                        {groups.map((g) => (
                             <button
                                 key={g.id}
                                 onClick={() => setFilterGroup(g.id)}

@@ -14,6 +14,12 @@ export type Json =
 export interface Database {
     public: {
         Tables: {
+            student_groups: {
+                Row: { id: string; name: string; short_name: string; sort_order: number; created_at: string };
+                Insert: { id?: string; name: string; short_name: string; sort_order?: number; created_at?: string };
+                Update: { name?: string; short_name?: string; sort_order?: number };
+                Relationships: [];
+            };
             students: {
                 Row: {
                     id: string;
@@ -328,7 +334,7 @@ export interface Database {
 // Enum-like Types
 // =============================================
 
-export type GroupId = 'nhom_1' | 'nhom_2' | 'nhom_3';
+export type GroupId = string;
 export type AttendanceStatus = 'present' | 'absent' | 'excused';
 export type ScoreCategory = 'chuyen_can' | 'y_thuc' | 'chuyen_mon';
 export type LessonPlanSection = 'khoi_dong' | 'ky_thuat' | 'the_luc' | 'tong_ket';

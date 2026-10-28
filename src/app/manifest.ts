@@ -5,7 +5,10 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Võ Đường Manager',
     short_name: 'Võ Đường',
     description: 'Ứng dụng quản lý điểm danh và phân loại học sinh võ thuật',
-    start_url: '/',
+    // Keep the identity used by existing installations while skipping the home redirect.
+    id: '/',
+    start_url: '/students',
+    scope: '/',
     display: 'standalone',
     background_color: '#16171c',
     theme_color: '#caa052',

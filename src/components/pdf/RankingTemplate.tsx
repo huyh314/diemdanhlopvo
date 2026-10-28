@@ -1,5 +1,5 @@
 import React from 'react';
-import { getGroupName } from '@/lib/constants';
+import { useGroups } from '@/components/GroupsProvider';
 
 interface RankingData {
     student_id: string;
@@ -20,6 +20,7 @@ interface RankingTemplateProps {
 }
 
 export const RankingTemplate = React.forwardRef<HTMLDivElement, RankingTemplateProps>(({ rankings, week, groupId }, ref) => {
+    const { getGroupName } = useGroups();
     // Lọc theo nhóm nếu có groupId
     const filteredRankings = groupId ? rankings.filter(r => r.group_id === groupId) : rankings;
 

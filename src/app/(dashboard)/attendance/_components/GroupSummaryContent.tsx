@@ -1,6 +1,5 @@
 import { getGroupSummary } from '@/lib/dal';
 import { MetricCard } from '@/components/ui';
-import { getGroupName } from '@/lib/constants';
 
 export default async function GroupSummaryContent() {
     const groupSummary = await getGroupSummary();

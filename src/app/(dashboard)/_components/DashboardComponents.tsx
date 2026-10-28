@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getGroupSummary, getStudentRankings } from '@/lib/dal';
 import { MetricCard, Card } from '@/components/ui';
-import { getGroupName } from '@/lib/constants';
+import { GroupLabel } from '@/components/GroupsProvider';
 
 // ==========================================
 // 1. KPI SUMMARY
@@ -92,7 +92,7 @@ export async function DashboardRankings() {
                             <div>
                                 <div className="font-bold text-[var(--text-primary)] group-hover:text-[var(--accent-from)] transition-colors">{r.student_name}</div>
                                 <div className="text-xs text-[var(--text-muted)] font-mono uppercase tracking-tighter">
-                                    {getGroupName(r.group_id)}
+                                    <GroupLabel id={r.group_id} />
                                 </div>
                             </div>
                         </div>
@@ -156,7 +156,7 @@ export async function DashboardGroupSummary() {
                     <div key={g.group_id} className="space-y-2 relative group">
                         <div className="flex justify-between text-sm items-end">
                             <span className="font-bold text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors">
-                                {getGroupName(g.group_id)}
+                                <GroupLabel id={g.group_id} />
                             </span>
                             <span className="text-xs font-mono bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
                                 <span className="text-[var(--text-primary)] font-bold">{g.present_count}</span>

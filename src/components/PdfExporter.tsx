@@ -5,7 +5,7 @@ import { useToast } from './Toast';
 import { StudentReportData, SemesterReportTemplate } from './pdf/SemesterReportTemplate';
 import { RankingTemplate } from './pdf/RankingTemplate';
 import ReportPreviewModal from './ReportPreviewModal';
-import { getGroupShortName } from '@/lib/constants';
+import { GroupLabel } from '@/components/GroupsProvider';
 
 interface PdfExporterProps {
     rankings: StudentReportData[];
@@ -13,7 +13,8 @@ interface PdfExporterProps {
 }
 
 export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
-    const [isExporting, setIsExporting] = useState(false);
+    const [exportKind, setExportKind] = useState<'ranking' | 'reports' | null>(null);
+    const isExporting = exportKind !== null;
     const [showBxhPreview, setShowBxhPreview] = useState(false);
     const [showPhieuPreview, setShowPhieuPreview] = useState(false);
     const { toast } = useToast();
@@ -23,7 +24,7 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
     // --- BXH Export (PDF) ---
     async function exportRankingPdf() {
         if (rankings.length === 0) return;
-        setIsExporting(true);
+        setExportKind('ranking');
         toast('Đang xử lý xuất Bảng Xếp Hạng...', 'info');
         try {
             const html2canvas = (await import('html2canvas')).default;
@@ -56,14 +57,14 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
             console.error(err);
             toast('Lỗi xuất PDF: ' + (err as Error).message, 'error');
         } finally {
-            setIsExporting(false);
+            setExportKind(null);
         }
     }
 
     // --- Phiếu Kết Quả Export (PDF) ---
     async function exportAllReportsPdf() {
         if (rankings.length === 0) return;
-        setIsExporting(true);
+        setExportKind('reports');
         toast(`Đang xử lý ${rankings.length} phiếu kết quả... Vui lòng đợi!`, 'info');
 
         try {
@@ -94,7 +95,7 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
             console.error(err);
             toast('Lỗi xuất Phiếu KQ: ' + (err as Error).message, 'error');
         } finally {
-            setIsExporting(false);
+            setExportKind(null);
         }
     }
 
@@ -144,19 +145,21 @@ export default function PdfExporter({ rankings, weekKey }: PdfExporterProps) {
                 </ReportPreviewModal>
             )}
 
-            {/* Hidden Templates for HTML2Canvas — luôn tồn tại trong DOM */}
-            <div style={{ position: 'absolute', top: 0, left: '-20000px', width: '210mm' }} aria-hidden="true">
-                {groups.map(g => (
-                    <div key={`ranking-${g}`} id={`pdf-ranking-template-${g}`} className="bg-white">
-                        <RankingTemplate rankings={rankings as any} week={weekKey} groupId={g} />
-                    </div>
-                ))}
-                {rankings.map(s => (
-                    <div key={s.student_id} id={`pdf-report-${s.student_id}`} className="bg-white" style={{ position: 'absolute', top: 0, left: 0, width: '210mm', height: '297mm' }}>
-                        <SemesterReportTemplate student={s} week={weekKey} />
-                    </div>
-                ))}
-            </div>
+            {/* Mount print layouts only on demand; retain them if the preview closes during export. */}
+            {(showBxhPreview || showPhieuPreview || isExporting) && (
+                <div style={{ position: 'absolute', top: 0, left: '-20000px', width: '210mm' }} aria-hidden="true">
+                    {(showBxhPreview || exportKind === 'ranking') && groups.map(g => (
+                        <div key={`ranking-${g}`} id={`pdf-ranking-template-${g}`} className="bg-white">
+                            <RankingTemplate rankings={rankings as any} week={weekKey} groupId={g} />
+                        </div>
+                    ))}
+                    {(showPhieuPreview || exportKind === 'reports') && rankings.map(s => (
+                        <div key={s.student_id} id={`pdf-report-${s.student_id}`} className="bg-white" style={{ position: 'absolute', top: 0, left: 0, width: '210mm', height: '297mm' }}>
+                            <SemesterReportTemplate student={s} week={weekKey} />
+                        </div>
+                    ))}
+                </div>
+            )}
         </>
     );
 }
@@ -196,7 +199,7 @@ function BxhPreviewTable({ rankings, weekKey }: { rankings: any[]; weekKey?: str
                                 <tr key={r.student_id} className={`border-b border-white/5 hover:bg-white/5 ${rank <= 3 ? 'bg-yellow-500/5' : ''}`}>
                                     <td className="px-4 py-2.5 text-center">{typeof medal === 'string' ? <span className="text-lg">{medal}</span> : <span className="text-sm text-gray-500">{medal}</span>}</td>
                                     <td className="px-4 py-2.5 font-semibold">{r.student_name}</td>
-                                    <td className="px-4 py-2.5 text-center text-xs text-[var(--text-muted)]">{getGroupShortName(r.group_id)}</td>
+                                    <td className="px-4 py-2.5 text-center text-xs text-[var(--text-muted)]"><GroupLabel id={r.group_id} short /></td>
                                     <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_chuyen_can}</td>
                                     <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_y_thuc}</td>
                                     <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_chuyen_mon}</td>
@@ -237,7 +240,7 @@ function PhieuPreviewTable({ rankings, weekKey }: { rankings: any[]; weekKey?: s
                         {rankings.map((r: any) => (
                             <tr key={r.student_id} className="border-b border-white/5 hover:bg-white/5">
                                 <td className="px-4 py-2.5 font-semibold">{r.student_name}</td>
-                                <td className="px-4 py-2.5 text-center text-xs text-[var(--text-muted)]">{getGroupShortName(r.group_id)}</td>
+                                <td className="px-4 py-2.5 text-center text-xs text-[var(--text-muted)]"><GroupLabel id={r.group_id} short /></td>
                                 <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_chuyen_can}</td>
                                 <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_y_thuc}</td>
                                 <td className="px-4 py-2.5 text-center font-mono text-[var(--text-muted)]">{r.cat_chuyen_mon}</td>

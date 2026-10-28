@@ -3,7 +3,7 @@
 import { useState, useTransition, useRef, useCallback } from 'react';
 import { createLessonPlanAction, updateLessonPlanAction } from '@/lib/lesson-plan.actions';
 import type { LessonPlanRow, LessonPlanContent, LessonPlanSection, GroupId } from '@/types/database.types';
-import { GROUPS } from '@/lib/constants';
+import { useGroups } from '@/components/GroupsProvider';
 import { mediaAccessUrl } from '@/lib/media-url';
 import { uploadLessonMedia } from '@/lib/upload-media';
 
@@ -289,6 +289,7 @@ export default function LessonPlanModal({
     onClose,
     onSuccess,
 }: LessonPlanModalProps) {
+    const { groups } = useGroups();
     const isEdit = !!plan;
     const [isPending, startTransition] = useTransition();
     const [error, setError] = useState<string>('');
@@ -515,7 +516,7 @@ export default function LessonPlanModal({
                                     onChange={(e) => setGroupId(e.target.value as GroupId)}
                                     className="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-primary)] border border-[var(--border-primary)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-from)] transition text-sm"
                                 >
-                                    {GROUPS.map((g) => (
+                                    {groups.map((g) => (
                                         <option key={g.id} value={g.id}>{g.name}</option>
                                     ))}
                                 </select>
